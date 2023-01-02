@@ -1,0 +1,38 @@
+package com.example.demo.repository;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.domain.Original;
+
+@Repository
+public class OriginalRepository {
+
+
+	private static final RowMapper<String> CATEGORY_NAME_ROW_MAPPER = (rs, i) -> {
+		String categoryName = rs.getString("category_name");
+		return categoryName;
+	};
+
+	@Autowired
+	private NamedParameterJdbcTemplate template;
+
+
+
+	public List<String> findByCategoryName() {
+		String sql = "select distinct category_name from original ;";
+		List<String> categoryNameList = template.query(sql, CATEGORY_NAME_ROW_MAPPER);
+		return categoryNameList;
+
+	}
+
+}

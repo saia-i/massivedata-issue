@@ -1,0 +1,37 @@
+package com.example.demo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class SampleRepository {
+
+	@Autowired
+	private NamedParameterJdbcTemplate template;
+
+	private static final RowMapper<Sample> SAMPLE_ROW_MAPPER = (rs, i) -> {
+		Sample sample = new Sample();
+		sample.setId(rs.getInt("id"));
+		sample.setName(rs.getString("name"));
+		return sample;
+	};
+
+	public Sample load(int id) {
+		String sql = "SELECT id ,name FROM sample WHERE id=:id;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
+		Sample sample = template.queryForObject(sql, param, SAMPLE_ROW_MAPPER);
+
+		return sample;
+	}
+
+	public void insert() {
+		String sql = "insert into sample (name) values ('名前');";
+		SqlParameterSource param = new MapSqlParameterSource();
+		template.update(sql, param);
+	}
+
+}

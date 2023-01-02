@@ -1,0 +1,33 @@
+package com.example.demo.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.demo.Sample;
+import com.example.demo.SampleRepository;
+
+@Controller
+@RequestMapping("/sample")
+public class SampleController {
+	
+	@Autowired
+	private SampleRepository sampleRepository;
+	
+	@GetMapping("")
+	public String index(Model model) {
+		sampleRepository.insert();
+		System.out.println("インサートできた");
+		Sample sample=sampleRepository.load(2);
+		System.out.println(sample);
+		String strSample=sample.toString();
+		model.addAttribute("sample", strSample);
+		
+		
+		return "sample";
+	}
+	
+
+}

@@ -1,0 +1,28 @@
+package com.example.demo.service;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.domain.Item;
+import com.example.demo.form.InsertItemForm;
+import com.example.demo.repository.ItemRepository;
+
+@Service
+public class ItemInsertService {
+
+	@Autowired
+	private ItemRepository itemRepository;
+
+	public int insertItem(InsertItemForm form) {
+		Item item = new Item();
+		BeanUtils.copyProperties(form, item);
+		item.setConditionId(Integer.parseInt(form.getConditionId()));
+		item.setCategory(Integer.parseInt(form.getCategory()));
+		item.setPrice(Double.parseDouble(form.getPrice()));
+
+		int id = itemRepository.insertNewItem(item);
+		return id;
+	}
+
+}

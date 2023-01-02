@@ -1,0 +1,191 @@
+package com.example.demo.repository;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.domain.Item;
+import com.example.demo.domain.Original;
+
+@Repository
+public class ItemRepository {
+
+	@Autowired
+	private NamedParameterJdbcTemplate template;
+
+	private static final RowMapper<Item> ITEM_ROW_MAPPER = new BeanPropertyRowMapper<>(Item.class);
+
+
+	private static final RowMapper<Integer> COUNT_ROW_MAPPER = (rs, i) -> {
+		Integer count = rs.getInt("count");
+		return count;
+	};
+
+	private static final RowMapper<Original> ORIGINAL_ROW_MAPPER = new BeanPropertyRowMapper<>(Original.class);
+
+	public Integer insertNewItem(Item item) {
+		String sql = "INSERT INTO items (name,condition_id,category,brand,price,description) VALUES(:name,:conditionId,:category,:brand,:price,:description);";
+		SqlParameterSource param = new BeanPropertySqlParameterSource(item);
+
+		// 採番されたidを取得する
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		String keyColumnNames[] = { "id" };
+		template.update(sql, param, keyHolder, keyColumnNames);
+		Integer id = keyHolder.getKey().intValue();
+
+		return id;
+	}
+
+	public Integer insert(Item item) {
+		String sql = "INSERT INTO items (name,condition_id,category,brand,price,shipping,description) VALUES(:name,:conditionId,:category,:brand,:price,:shipping,:description);";
+		SqlParameterSource param = new BeanPropertySqlParameterSource(item);
+
+		// 採番されたidを取得する
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		String keyColumnNames[] = { "id" };
+		template.update(sql, param, keyHolder, keyColumnNames);
+		Integer id = keyHolder.getKey().intValue();
+
+		return id;
+	}
+
+	public void update(Item item) {
+		String sql = "UPDATE items SET name=:name,condition_id=:conditionId,category=:category,brand=:brand,price=:price,shipping=:shipping,description=:description WHERE id=:id;";
+		SqlParameterSource param = new BeanPropertySqlParameterSource(item);
+		template.update(sql, param);
+	}
+
+	public Original loadOfCategoryNameAll(int itemId) {
+		String sql = "SELECT i.id id,i.name name,i.condition_id condition_id,c.name_all category_name,i.brand brand,i.price price,i.shipping shipping,i.description description FROM (SELECT id,name,condition_id,category,brand,price,shipping,description FROM items WHERE id=:itemId) i JOIN category c ON i.category=c.id;";
+		// categoryがname_all表示なのでOriginalドメインを使用(商品追加時のインサートはitemsにしかしないためitemsから検索)
+		SqlParameterSource param = new MapSqlParameterSource().addValue("itemId", itemId);
+		List<Original> originalList = template.query(sql, param, ORIGINAL_ROW_MAPPER);
+		if (originalList.size() == 0) {
+			return null;
+		}
+		return originalList.get(0);
+	}
+
+	public List<Item> findAll() {
+		String sql = "SELECT id,name,condition_id,category,brand,price,shipping,description FROM items ORDER BY price;";
+		List<Item> itemList = template.query(sql, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	// SQL未完成(joinしてるが、別名つけていない)
+	public List<Item> findListPaging(int startId) {
+		String sql = "SELECT id,name,condition_id,category,brand,price,shipping,description FROM items i LEFT OUTER JOIN category c1 ON i.category=c1.id  ORDER BY i.price LIMIT :startId,30 ;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("startId", startId);
+		List<Item> itemList = template.query(sql, param, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	public List<Item> searchByNameAndBrand(String name, String brand, int startId) {
+		String sql = "SELECT id,name,condition_id,category,brand,price,shipping,description FROM items WHERE name like :name AND brand like :brand ORDER BY id DESC LIMIT :startId,30; ";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%")
+				.addValue("brand", "%" + brand + "%").addValue("startId", startId);
+		List<Item> itemList = template.query(sql, param, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+
+	public List<Item> searchItemOfMiddleCategory(Integer category, String name, String brand, int startId) {
+		String sql = "SELECT i2.id id,i2.name name,i2.condition_id condition_id,i2.category category,i2.brand brand,i2.price price,i2.shipping shipping,i2.description description from (SELECT id,parent,name,name_all FROM category WHERE parent=:category) c join items i2 on c.id=i2.category where i2.name like :name and i2.brand like :brand order by i2.id desc limit :startId,30;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%")
+				.addValue("startId", startId).addValue("brand", "%" + brand + "%").addValue("category", category);
+		List<Item> itemList = template.query(sql, param, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	public List<Item> searchItemOfBigCategory(Integer category, String name, String brand, int startId) {
+		String sql = "SELECT i.id id,i.name name,i.condition_id condition_id,i.category category,i.brand brand,i.price price,i.shipping shipping,i.description description FROM (SELECT id,name,parent,name_all FROM category WHERE parent=:category) c1 JOIN category c2 ON c1.id=c2.parent JOIN items i ON c2.id=i.category WHERE i.name like :name AND i.brand like :brand ORDER BY i.id DESC LIMIT :startId,30;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%")
+				.addValue("startId", startId).addValue("brand", "%" + brand + "%").addValue("category", category);
+		List<Item> itemList = template.query(sql, param, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	public int CountItemByNameAndBrand(String name, String brand) {
+		String sql = "SELECT count(id) as count FROM items WHERE name like :name AND brand like :brand ; ";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%").addValue("brand",
+				"%" + brand + "%");
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+	public int countItemBySmallCategory(Integer category, String name, String brand) {
+		String sql = "select count(id) as count from items where name like :name and brand like :brand and category=:category;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%")
+				.addValue("brand", "%" + brand + "%").addValue("category", category);
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+	public int countItemByMiddleCategory(Integer category, String name, String brand) {
+		String sql = "SELECT count(i2.id) as count from (SELECT id,parent,name,name_all FROM category WHERE parent=:category) c join items i2 on c.id=i2.category where i2.name like :name and i2.brand like :brand ;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%")
+				.addValue("brand", "%" + brand + "%").addValue("category", category);
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+	public int countItemByBigCategory(Integer category, String name, String brand) {
+		String sql = "SELECT count(i.id) as count FROM (SELECT id,name,parent,name_all FROM category WHERE parent=:category) c1 JOIN category c2 ON c1.id=c2.parent JOIN items i ON c2.id=i.category WHERE i.name like :name AND i.brand like :brand ;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", "%" + name + "%")
+				.addValue("brand", "%" + brand + "%").addValue("category", category);
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+	public List<Item> findAllJoinOriginal() {
+		String sql = "SELECT o.id,o.name,o.condition_id,c.id category,o.brand,o.price,o.shipping,o.description FROM original o LEFT OUTER JOIN category c ON o.category_name=c.name_all ;";
+		template.getJdbcTemplate().setFetchSize(5000);
+		List<Item> itemList = template.query(sql, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	public int count() {
+		String sql = "SELECT count(id) AS count FROM items;";
+		SqlParameterSource param = new MapSqlParameterSource();
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+	public List<Item> findByFuzzyCategoryName(String name, int startId) {
+		String sql = "SELECT i2.id id,i2.name name,i2.condition_id condition_id,i2.category category,i2.brand brand,i2.price price,i2.shipping shipping,i2.description description from (SELECT id,parent,name,name_all FROM category WHERE name_all LIKE :name) c join items i2 on c.id=i2.category  order by i2.id desc limit :startId,30;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", name).addValue("startId", startId);
+		List<Item> itemList = template.query(sql, param, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	public int countOfFuzzyCategoryName(String name) {
+		String sql = "SELECT count(i2.id) as count from (SELECT id,parent,name,name_all FROM category WHERE name_all LIKE :name) c join items i2 on c.id=i2.category ;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", name);
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+	public List<Item> findByBrand(String brand, int startId) {
+		String sql = "SELECT id,name,condition_id,category,brand,price,shipping,description FROM items WHERE brand=:brand  order by id desc limit :startId,30;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("brand", brand).addValue("startId", startId);
+		List<Item> itemList = template.query(sql, param, ITEM_ROW_MAPPER);
+		return itemList;
+	}
+
+	public int countByBrand(String brand) {
+		String sql = "SELECT count(id) as count FROM items WHERE brand=:brand;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("brand", brand);
+		int count = template.queryForObject(sql, param, COUNT_ROW_MAPPER);
+		return count;
+	}
+
+}

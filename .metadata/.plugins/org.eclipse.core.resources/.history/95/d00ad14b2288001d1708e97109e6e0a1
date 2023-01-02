@@ -1,0 +1,77 @@
+package com.example.demo.service;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.domain.Item;
+import com.example.demo.form.InsertItemForm;
+import com.example.demo.repository.ItemRepository;
+
+@Service
+public class ItemInsertService {
+
+	@Autowired
+	private ItemRepository itemRepository;
+
+	public int insertItem(InsertItemForm form) {
+		Item item = new Item();
+		BeanUtils.copyProperties(form, item);
+		item.setConditionId(Integer.parseInt(form.getConditionId()));
+		item.setCategory(Integer.parseInt(form.getCategory()));
+		item.setPrice(Double.parseDouble(form.getPrice()));
+
+		int id=itemRepository.insertNewItem(item);
+		return id;
+	}
+
+	public void insertAllData() throws SQLException {
+
+		// ItemにcategoryDetialを持たせたのでcategoryカラムへのコピーがされなくなっているので再利用するときは注意
+		List<Item> itemList = itemRepository.findAllJoinOriginal();
+		System.out.println("全件検索完了");
+
+		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari", "postgres", "postgres");
+		String sql = "INSERT INTO items (id,name,condition_id,category,brand,price,shipping,description) VALUES(?,?,?,?,?,?,?,?);";
+		PreparedStatement statement = connection.prepareStatement(sql);
+
+		int cnt = 0;
+		int listCnt = itemList.size();
+
+		for (Item item : itemList) {
+			statement.setInt(1, item.getId());
+			statement.setString(2, item.getName());
+			if (item.getConditionId() == null) {
+				statement.setObject(3, null);
+			} else {
+				statement.setInt(3, item.getConditionId());
+			}
+			if (item.getCategory() == null) {
+				statement.setObject(4, null);
+			} else {
+				statement.setInt(4, item.getCategory());
+			}
+			statement.setString(5, item.getBrand());
+			statement.setDouble(6, item.getPrice());
+			statement.setInt(7, item.getShipping());
+			statement.setString(8, item.getDescription());
+			statement.addBatch();
+			cnt++;
+			if (cnt % 5000 == 0 || cnt == listCnt) {
+				statement.executeBatch();
+				System.out.println(cnt + "件終了");
+			}
+		}
+
+		statement.close();
+		connection.commit();
+		connection.close();
+	}
+
+}

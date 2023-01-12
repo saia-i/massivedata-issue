@@ -2,10 +2,8 @@
  *
  */
 "use strict";
-console.log("js読み込めてるよ");
 
 $("#bigId").change(function() {
-	console.log("method1呼ばれてるよ");
 	let token = $("meta[name='_csrf']").attr("content");
 	let header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function(e, xhr, options) {
@@ -42,7 +40,6 @@ $("#bigId").change(function() {
 });
 
 $("#middleId").change(function() {
-	console.log("method2呼ばれてるよ");
 	let token = $("meta[name='_csrf']").attr("content");
 	let header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function(e, xhr, options) {

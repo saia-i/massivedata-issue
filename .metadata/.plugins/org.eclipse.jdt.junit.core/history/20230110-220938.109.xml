@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Rerun mercari (Failed Tests first)" project="mercari" tests="3" started="3" failures="0" errors="0" ignored="0">
+  <testsuite name="com.example.demo.repository.UserRepositoryTest" time="0.675" displayname="UserRepositoryTest" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.repository.UserRepositoryTest]">
+    <testcase name="testLoad" classname="com.example.demo.repository.UserRepositoryTest" time="0.675" displayname="testLoad()" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.repository.UserRepositoryTest]/[method:testLoad()]"/>
+  </testsuite>
+  <testsuite name="com.example.demo.SpringBootDockerApplicationTests" time="0.01" displayname="SpringBootDockerApplicationTests" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.SpringBootDockerApplicationTests]">
+    <testcase name="contextLoads" classname="com.example.demo.SpringBootDockerApplicationTests" time="0.01" displayname="contextLoads()" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.SpringBootDockerApplicationTests]/[method:contextLoads()]"/>
+  </testsuite>
+  <testsuite name="com.example.demo.controller.ItemInsertControllerTest" time="2.34" displayname="ItemInsertControllerTest" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.controller.ItemInsertControllerTest]">
+    <testcase name="indexSuccess" classname="com.example.demo.controller.ItemInsertControllerTest" time="2.34" displayname="/itemInsert/を呼び出した場合" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.controller.ItemInsertControllerTest]/[method:indexSuccess()]"/>
+  </testsuite>
+</testrun>

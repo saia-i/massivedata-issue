@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="mercari" project="mercari" tests="2" started="2" failures="0" errors="0" ignored="0">
+  <testsuite name="com.example.demo.repository.UserRepositoryTest" time="0.944" displayname="UserRepositoryTest" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.repository.UserRepositoryTest]">
+    <testcase name="testLoad" classname="com.example.demo.repository.UserRepositoryTest" time="0.944" displayname="testLoad()" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.repository.UserRepositoryTest]/[method:testLoad()]"/>
+  </testsuite>
+  <testsuite name="com.example.demo.SpringBootDockerApplicationTests" time="0.011" displayname="SpringBootDockerApplicationTests" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.SpringBootDockerApplicationTests]">
+    <testcase name="contextLoads" classname="com.example.demo.SpringBootDockerApplicationTests" time="0.011" displayname="contextLoads()" uniqueid="[engine:junit-jupiter]/[class:com.example.demo.SpringBootDockerApplicationTests]/[method:contextLoads()]"/>
+  </testsuite>
+</testrun>

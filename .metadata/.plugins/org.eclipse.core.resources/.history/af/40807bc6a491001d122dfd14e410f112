@@ -1,0 +1,96 @@
+package com.example.demo.controller;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.example.demo.domain.Big;
+import com.example.demo.domain.Middle;
+import com.example.demo.domain.Small;
+import com.example.demo.form.InsertItemForm;
+import com.example.demo.service.ItemInsertService;
+import com.example.demo.service.SelectCategoryService;
+import com.example.demo.service.ShowDetailService;
+
+@SpringBootTest
+public class ItemInsertControllerTest {
+
+	@MockBean
+	private ItemInsertService insertService;
+
+	@MockBean
+	private ShowDetailService showDetailService;
+
+	@MockBean
+	private SelectCategoryService selectCategoryService;
+
+	private MockMvc mockMvc;
+
+	@Autowired
+	WebApplicationContext webApplicationContext;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+	}
+
+	@Test
+	@DisplayName("/itemInsert/を呼び出した場合")
+	public void indexSuccess() throws Exception {
+		List<Big> bigList = new ArrayList<>();
+		doReturn(bigList).when(selectCategoryService).findBigAll();
+
+		MvcResult result=this.mockMvc.perform(get("/itemInsert/").with(csrf())).andReturn();
+		@SuppressWarnings("unchecked")
+		List<Middle> resultMiddleList=(List<Middle>)result.getModelAndView().getModel().get("middleList");
+		assertEquals(resultMiddleList.get(0).getId(),0);
+		assertEquals(resultMiddleList.get(0).getName(),"---");
+		@SuppressWarnings("unchecked")
+		List<Small> resultSmallList=(List<Small>)result.getModelAndView().getModel().get("smallList");
+		assertEquals(resultSmallList.get(0).getId(),0);
+		assertEquals(resultSmallList.get(0).getName(),"---");
+		
+		
+		this.mockMvc.perform(get("/itemInsert/").with(csrf())).andExpect(model().attribute("bigList", bigList))
+			.andExpect(view().name("add"));
+
+	}
+	
+	@Test
+	@DisplayName("/itemInsert/addを呼び出した場合（）")
+	public void addSuccess() throws Exception {
+		InsertItemForm form=new InsertItemForm();
+		form.setName(null);
+		form.setConditionId("1");
+		form.setCategory("1");
+//		MvcResult result =this.mockMvc.perform(post("/add").with(csrf()).flashAttr("form", form)).andReturn();
+//		BindingResult bindResult = (BindingResult) result.getModelAndView().getModel().get(BindingResult.MODEL_KEY_PREFIX + "form");
+//        String mes = bindResult.getFieldError().getDefaultMessage();
+//        assertEquals("error:may not be empty", mes);
+
+		
+		this.mockMvc.perform(post("/itemInsert/add").flashAttr("insertItemForm", form).with(csrf()))
+		.andExpect(model().hasErrors());
+		
+	}
+
+}

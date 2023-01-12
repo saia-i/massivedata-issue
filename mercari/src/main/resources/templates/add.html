@@ -162,7 +162,7 @@
 	<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
 	<script src="../js/select_category.js"></script>
 </body>
-<meta th:name="_csrf" th:content="${_csrf.token}">
-<meta th:name="_csrf_header" th:content="${_csrf.headerName}">
-
+<meta th:if="${_csrf}" th:name="_csrf" th:content="${_csrf.token}">
+<meta th:if="${_csrf}" th:name="_csrf_header" th:content="${_csrf.headerName}">
+ 
 </html>

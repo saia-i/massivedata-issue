@@ -2,17 +2,31 @@ package com.example.demo.domain;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * オリジナル情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 @JsonPropertyOrder({ "train_id", "name", "item_condition_id", "category_name", "brand_name", "price", "shipping",
 		"item_description" })
 public class Original {
 
+	/** ID */
 	private String train_id;
+	/** 名前 */
 	private String name;
+	/** 状態 */
 	private String item_condition_id;
+	/** カテゴリ */
 	private String category_name;
+	/** ブランド名 */
 	private String brand_name;
+	/** 価格 */
 	private String price;
+	/** 配送情報 */
 	private String shipping;
+	/** 説明 */
 	private String item_description;
 
 	public Original(String train_id, String name, String item_condition_id, String category_name, String brand_name,

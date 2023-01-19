@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.Big;
 import com.example.demo.domain.Category;
@@ -16,34 +17,39 @@ import com.example.demo.domain.Small;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.OriginalRepository;
 
+/**
+ * カテゴリ情報の挿入に関する業務処理を行うサービス.
+ * 
+ * @author inagakisaia
+ *
+ */
 @Service
+@Transactional
 public class CategoryInsertService {
-	
+
 	@Autowired
 	private OriginalRepository originalRepository;
 
 	@Autowired
 	private CategoryRepository categoryRepository;
 
-	public void findByCategoryName() {
+	/**
+	 * カテゴリカラムの情報を正規化した形に振り分けます.
+	 */
+	public void insertCategory() {
 
 		// ユニークカテゴリの名前を取得
 		List<String> categoryNameList = originalRepository.findByCategoryName();
 
 		// ユニーク親カテゴリ
-		Set<String> oya = new HashSet<>();
-		// ユニーク子カテゴリ
-		Set<String> child = new HashSet<>();
+		Set<String> parent = new HashSet<>();
 
-		// 全部入ってるやつ
+		// カテゴリの重複がないリストを作成
 		List<CategoryName> categoryList = new ArrayList<>();
 		for (int i = 0; i < categoryNameList.size(); i++) {
 			try {
 				String categoryNames[] = categoryNameList.get(i).split("/");
-
-				// ユニーク数計算
-				oya.add(categoryNames[0]);
-				child.add(categoryNames[1]);
+				parent.add(categoryNames[0]);
 
 				categoryList.add(new CategoryName(categoryNames[0], categoryNames[1], categoryNames[2],
 						categoryNameList.get(i)));
@@ -54,9 +60,10 @@ public class CategoryInsertService {
 		}
 		// 親カテゴリ名
 		List<Big> bigs = new ArrayList<>();
-		for (String tmp : oya) {
+		for (String tmp : parent) {
 			bigs.add(new Big(tmp, new ArrayList<>()));
 		}
+		// 子、孫カテゴリリストを持たせる
 		for (int i = 0; i < bigs.size(); i++) {
 			int count = 0;
 			for (int j = 0; j < categoryList.size(); j++) {
@@ -97,7 +104,7 @@ public class CategoryInsertService {
 				bigs.remove(i);
 			}
 		}
-
+		// カテゴリテーブルに挿入する
 		for (Big big : bigs) {
 			Category bigObj = new Category();
 			bigObj.setName(big.getName());
@@ -115,7 +122,6 @@ public class CategoryInsertService {
 					categoryRepository.insert(smallObj);
 				}
 			}
-			System.out.println(big.getName() + "インサート完了");
 		}
 	}
 

@@ -2,11 +2,21 @@ package com.example.demo.domain;
 
 import java.util.List;
 
+/**
+ * 子カテゴリ情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 public class Middle {
 
+	/** ID */
 	private int id;
+	/** 親カテゴリID */
 	private Integer parentId;
+	/** 名前 */
 	private String name;
+	/** 孫カテゴリリスト */
 	private List<Small> small;
 
 	public Middle() {

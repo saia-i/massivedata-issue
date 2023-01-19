@@ -20,11 +20,22 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
+/**
+ * オリジナル情報を操作するコントローラー.
+ * 
+ * @author inagakisaia
+ *
+ */
 @Controller
 @RequestMapping("/original")
 public class OriginalInsertController {
 
-
+	/**
+	 * tsvファイルの内容をオリジナルテーブルに挿入します.
+	 * 
+	 * @return 完了画面
+	 * @throws IOException
+	 */
 	@GetMapping("/insert")
 	public String insert() throws IOException {
 
@@ -37,13 +48,13 @@ public class OriginalInsertController {
 
 			MappingIterator<Original> it = mapper.readerFor(Original.class).with(schema).readValues(br);
 
-			// TSVファイルを全行まとめて読み込む場合
+			// TSVファイルを全行まとめて読み込む
 			List<Original> originalList = it.readAll();
 			System.out.println("読み込み完了");
 
-
 			try {
-				Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari", "postgres", "postgresz");
+				Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari",
+						"postgres", "postgresz");
 				String sql = "INSERT INTO original (id,name,condition_id,category_name,brand,price,shipping,description) values(?,?,?,?,?,?,?,?)";
 				PreparedStatement statement = connection.prepareStatement(sql);
 				int cnt = 0;
@@ -59,9 +70,11 @@ public class OriginalInsertController {
 					statement.setString(8, original.getItem_description());
 					statement.addBatch();
 					cnt++;
-					if (cnt % 5000 == 0 || cnt == listCnt) {
+
+					// 1万件ごとにDBへ流す
+					if (cnt % 10000 == 0 || cnt == listCnt) {
 						statement.executeBatch();
-						System.out.println(cnt+"件終了");
+						System.out.println(cnt + "件終了");
 					}
 				}
 				statement.close();
@@ -69,25 +82,10 @@ public class OriginalInsertController {
 				connection.close();
 
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		return "sample";
+		return "finished";
 	}
-	
+
 }
-
-
-// -- original
-// create table original (
-// id integer not null
-// , name character varying(255)
-// , condition_id integer
-// , category_name character varying(255)
-// , brand character varying(255)
-// , price double precision
-// , shipping integer
-// , description text
-// , constraint original_PKC primary key (id)
-// ) ;

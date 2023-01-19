@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.Big;
 import com.example.demo.domain.Middle;
@@ -17,6 +18,7 @@ import com.example.demo.repository.CategoryRepository;
  *
  */
 @Service
+@Transactional
 public class SelectCategoryService {
 
 	@Autowired

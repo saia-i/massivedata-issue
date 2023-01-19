@@ -1,10 +1,20 @@
 package com.example.demo.domain;
 
+/**
+ * カテゴリ名を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 public class CategoryName {
-	
+
+	/** 親カテゴリ名 */
 	private String big;
+	/** 子カテゴリ名 */
 	private String middle;
+	/** 孫カテゴリ名 */
 	private String small;
+	/** パス */
 	private String path;
 
 	public CategoryName() {
@@ -55,6 +65,5 @@ public class CategoryName {
 	public void setPath(String path) {
 		this.path = path;
 	}
-
 
 }

@@ -18,17 +18,16 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  */
 @Configuration
 public class SecurityConfig {
-	
+
 	/**
-	 * 全体に関するセキュリティ設定.
-	 * (指定のファイルに対してセキュリティ設定を無視する)
+	 * 全体に関するセキュリティ設定. (指定のファイルに対してセキュリティ設定を無視する)
 	 * 
 	 */
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.ignoring().antMatchers("/css/**","/js/**");
+		return (web) -> web.ignoring().antMatchers("/css/**", "/js/**");
 	}
-	
+
 	/**
 	 * ログイン、ログアウトに関する設定.
 	 * 
@@ -36,8 +35,11 @@ public class SecurityConfig {
 	 */
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		
-		http.authorizeRequests().antMatchers("/","/showDetail","/toPage","/search","/index","/registerUser","/registerUser/insert","/selectCategory/middle","/selectCategory/small").permitAll().anyRequest().authenticated();
+
+		http.authorizeRequests()
+				.antMatchers("/", "/showDetail", "/toPage", "/search", "/index", "/registerUser",
+						"/registerUser/insert", "/selectCategory/middle", "/selectCategory/small")
+				.permitAll().anyRequest().authenticated();
 
 		http.formLogin() // ログインに関する設定
 				.loginPage("/index?error=false") // ログイン画面に遷移させるパス(ログイン認証が必要なパスを指定してかつログインされていないとこのパスに遷移される)
@@ -57,10 +59,9 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 
 }

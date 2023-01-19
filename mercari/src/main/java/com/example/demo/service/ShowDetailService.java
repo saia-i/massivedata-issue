@@ -2,8 +2,9 @@ package com.example.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.domain.Original;
+import com.example.demo.domain.Item;
 import com.example.demo.repository.ItemRepository;
 
 /**
@@ -13,6 +14,7 @@ import com.example.demo.repository.ItemRepository;
  *
  */
 @Service
+@Transactional
 public class ShowDetailService {
 
 	@Autowired
@@ -24,9 +26,9 @@ public class ShowDetailService {
 	 * @param itemId 商品ID
 	 * @return 商品情報
 	 */
-	public Original showDetail(int itemId) {
-		Original original = itemRepository.loadOfCategoryNameAll(itemId);
-		return original;
+	public Item showDetail(int itemId) {
+		Item item = itemRepository.loadJoinCategory(itemId);
+		return item;
 	}
 
 }

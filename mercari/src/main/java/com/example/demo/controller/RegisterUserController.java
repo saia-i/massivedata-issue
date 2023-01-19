@@ -25,6 +25,12 @@ public class RegisterUserController {
 	@Autowired
 	private RegisterUserService registerUserService;
 
+	/**
+	 * ユーザ登録画面に遷移します.
+	 * 
+	 * @param form 入力情報を受け取るフォーム
+	 * @return ユーザ登録画面
+	 */
 	@GetMapping("")
 	public String index(RegisterUserForm form) {
 		return "register";
@@ -38,6 +44,7 @@ public class RegisterUserController {
 	 */
 	@PostMapping("/insert")
 	public String insert(@Validated RegisterUserForm form, BindingResult result) {
+		// 2つのパスワードが不一致だった場合にエラーを追加する
 		if (!form.getPassword().equals(form.getConfimationPassword())) {
 			FieldError fieldError = new FieldError(result.getObjectName(), "confimationPassword",
 					"error:password does not match");

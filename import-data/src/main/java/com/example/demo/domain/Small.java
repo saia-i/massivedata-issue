@@ -1,10 +1,20 @@
 package com.example.demo.domain;
 
+/**
+ * 孫カテゴリ情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 public class Small {
 
+	/** ID */
 	private int id;
+	/** 親カテゴリ名 */
 	private Integer parentId;
+	/** 名前 */
 	private String name;
+	/** パス */
 	private String path;
 
 	public Small() {

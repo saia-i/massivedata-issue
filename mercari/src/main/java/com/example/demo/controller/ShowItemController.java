@@ -35,13 +35,16 @@ public class ShowItemController {
 	@Autowired
 	private ShowItemService showItemService;
 
+	@Autowired
+	private HttpSession session;
+
 	@ModelAttribute("searchItemForm")
 	public SearchItemForm setUpSearchItemForm() {
 		return new SearchItemForm();
 	}
 
-	@Autowired
-	private HttpSession session;
+	// １ページあたりに表示する商品数
+	private final int NUMBER_OF_ITEMS = 30;
 
 	/**
 	 * トップページの表示を行います.
@@ -49,25 +52,21 @@ public class ShowItemController {
 	 * @return 商品一覧画面
 	 */
 	@GetMapping("")
-	public String showTopPage(SearchItemForm form, Model model, SessionStatus sessionStatus) {
+	public String showTopPage(Model model, SessionStatus sessionStatus) {
 		sessionStatus.setComplete();
-
-		session.removeAttribute("form");
-		session.removeAttribute("brandName");
 
 		List<Big> bigList = showItemService.findBigAll();
 		model.addAttribute("bigList", bigList);
-
-		// 総件数を取得後、総ページ数を算出
-		int count = showItemService.count();
-		int pageCnt = (count - 1) / 30 + 1;
-		session.setAttribute("pageCnt", pageCnt);
-		session.setAttribute("nowPage", 1);
 
 		// 最初のページを表示するためのitemListを取得
 		List<Item> itemList = showItemService.showList(0);
 		model.addAttribute("itemList", itemList);
 
+		// 総ページ数を算出
+		int count = itemList.get(0).getCount();
+		int pageCnt = (count - 1) / NUMBER_OF_ITEMS + 1;
+		session.setAttribute("pageCnt", pageCnt);
+		session.setAttribute("nowPage", 1);
 		return "list";
 	}
 
@@ -80,58 +79,41 @@ public class ShowItemController {
 	 * @return 商品一覧画面
 	 */
 	@RequestMapping("/toPage")
-	public String toPage(@ModelAttribute("searchItemForm") SearchItemForm form, String name, String brand, int page,
-			Model model) {
+	public String toPage(@ModelAttribute("searchItemForm") SearchItemForm form, int page, Model model) {
 
 		session.setAttribute("nowPage", page);
 
 		// 表示するitemListの始まりの値
-		int firstId = (page - 1) * 30;
+		int firstId = (page - 1) * NUMBER_OF_ITEMS;
 
-		List<Item> itemList = new ArrayList<>();
-		List<Big> bigList = showItemService.findBigAll();
-		model.addAttribute("bigList", bigList);
-		List<Middle> middleList = new ArrayList<>();
-		List<Small> smallList = new ArrayList<>();
+		String brand = null;
+		if (session.getAttribute("brandName") != null) {
+			brand = session.getAttribute("brandName").toString();
+		}
+		//商品検索
+		List<Item> itemList = showItemService.searchItemList(form, brand, firstId);
 
-		if (form.getName() == null && form.getBigId() == null && form.getBrand() == null) {
-
-			if (session.getAttribute("brandName") != null) {
-				itemList = showItemService.showItemByBrand(session.getAttribute("brandName").toString(), firstId);
-			} else {
-				itemList = showItemService.showList(firstId);
-			}
-		} else {
-			if (form.getName() == null) {
-				form.setName("");
-			}
-			if (form.getBrand() == null) {
-				form.setBrand("");
-			}
-			if (form.getBigId().equals("0")) {
-				itemList = showItemService.showItemByNameAndBrand(form.getName(), form.getBrand(), firstId);
-
-			} else if (form.getMiddleId().equals("0")) {
-				itemList = showItemService.showItemOfBigCategory(Integer.parseInt(form.getBigId()), form.getName(),
-						form.getBrand(), firstId);
-
-			} else if (form.getCategoryId().equals("0")) {
-				itemList = showItemService.showItemOfMiddleCategory(Integer.parseInt(form.getMiddleId()),
-						form.getName(), form.getBrand(), firstId);
+		if (brand != null) {
+			session.setAttribute("brandName", brand);
+		} else if (form.getBigId() != null && !form.getBigId().equals("0")) {
+			//category選択していた場合は該当のリストを保持するために検索しモデルにセット
+			List<Middle> middleList = new ArrayList<>();
+			if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {
 				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
 				model.addAttribute("middleList", middleList);
-
 			} else {
-				itemList = showItemService.showItemOfSmallCategory(Integer.parseInt(form.getCategoryId()),
-						form.getName(), form.getBrand(), firstId);
+				List<Small> smallList = new ArrayList<>();
 				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
 				model.addAttribute("middleList", middleList);
 				smallList = showItemService.showSmallListByParent(Integer.parseInt(form.getMiddleId()));
 				model.addAttribute("smallList", smallList);
-
 			}
 		}
 		model.addAttribute("itemList", itemList);
+
+		// 検索フォームの親カテゴリリスト
+		List<Big> bigList = showItemService.findBigAll();
+		model.addAttribute("bigList", bigList);
 
 		return "list";
 	}
@@ -145,59 +127,43 @@ public class ShowItemController {
 	 */
 	@RequestMapping("/search")
 	public String searchItemList(@ModelAttribute("searchItemForm") SearchItemForm form, String brandName, Model model) {
+		session.removeAttribute("brandName");
 
-		List<Item> itemList = new ArrayList<>();
-		List<Middle> middleList = new ArrayList<>();
-		List<Small> smallList = new ArrayList<>();
-		int count = 0;
+		// 受け取った値から商品を検索
+		List<Item> itemList = showItemService.searchItemList(form, brandName, 0);
 
-		if (brandName != null) {
-			itemList = showItemService.showItemByBrand(brandName, 0);
-			count = showItemService.countByBrand(brandName);
+		if (brandName != null) {// ブランド名をクリックしていた場合はsessionにセット
 			session.setAttribute("brandName", brandName);
-		} else {
-			if (form.getName() == null) {
-				form.setName("");
-			}
-			if (form.getBrand() == null) {
-				form.setBrand("");
-			}
-			if (form.getBigId().equals("0")) {
-				itemList = showItemService.showItemByNameAndBrand(form.getName(), form.getBrand(), 0);
-				count = showItemService.countItemByNameAndBrand(form.getName(), form.getBrand());
-
-			} else if (form.getMiddleId().equals("0") || form.getMiddleId() == null) {
-				itemList = showItemService.showItemOfBigCategory(Integer.parseInt(form.getBigId()), form.getName(),
-						form.getBrand(), 0);
-				count = showItemService.countItemByBigCategory(Integer.parseInt(form.getBigId()), form.getName(),
-						form.getBrand());
-
-			} else if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {
-				itemList = showItemService.showItemOfMiddleCategory(Integer.parseInt(form.getMiddleId()),
-						form.getName(), form.getBrand(), 0);
-				count = showItemService.countItemByMiddleCategory(Integer.parseInt(form.getMiddleId()), form.getName(),
-						form.getBrand());
+		} else if (!form.getBigId().equals("0")) {
+			//category選択していた場合は該当のリストを保持するために検索しモデルにセット
+			List<Middle> middleList = new ArrayList<>();
+			if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {
 				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
 				model.addAttribute("middleList", middleList);
-
 			} else {
-				itemList = showItemService.showItemOfSmallCategory(Integer.parseInt(form.getCategoryId()),
-						form.getName(), form.getBrand(), 0);
-				count = showItemService.countItemBySmallCategory(Integer.parseInt(form.getCategoryId()), form.getName(),
-						form.getBrand());
+				List<Small> smallList = new ArrayList<>();
 				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
 				model.addAttribute("middleList", middleList);
 				smallList = showItemService.showSmallListByParent(Integer.parseInt(form.getMiddleId()));
 				model.addAttribute("smallList", smallList);
 			}
-			session.setAttribute("form", form);
 		}
+		model.addAttribute("itemList", itemList);
+
+		int count = 0;
+		int pageCnt = 0;
+		if (itemList.size() > 0) {// 検索結果あり->ページ数を算出
+			count = itemList.get(0).getCount();
+			pageCnt = (count - 1) / NUMBER_OF_ITEMS + 1;
+		} else {// 検索結果なし->HTMLで表示させる文言をモデルにセット
+			model.addAttribute("noSearch", "No results, please try another search.");
+		}
+		session.setAttribute("pageCnt", pageCnt);
+		session.setAttribute("nowPage", 1);
+
+		// 検索フォームの親カテゴリリスト
 		List<Big> bigList = showItemService.findBigAll();
 		model.addAttribute("bigList", bigList);
-		model.addAttribute("itemList", itemList);
-		session.setAttribute("nowPage", 1);
-		int pageCnt = (count - 1) / 30 + 1;
-		session.setAttribute("pageCnt", pageCnt);
 
 		return "list";
 	}

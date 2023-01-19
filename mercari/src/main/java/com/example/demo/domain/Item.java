@@ -26,12 +26,22 @@ public class Item {
 	private Integer shipping;
 	/** 説明 */
 	private String description;
+	/** 総数 */
+	private int count;
 
 	@Override
 	public String toString() {
 		return "Item [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", category=" + category
 				+ ", categoryDetail=" + categoryDetail + ", brand=" + brand + ", price=" + price + ", shipping="
-				+ shipping + ", description=" + description + "]";
+				+ shipping + ", description=" + description + ", count=" + count + "]";
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 
 	public Integer getCategory() {
@@ -104,6 +114,11 @@ public class Item {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getNameAll() {
+		CategoryDetail category = this.getCategoryDetail();
+		return category.getBigName() + "/" + category.getMiddleName() + "/" + category.getSmallName();
 	}
 
 }

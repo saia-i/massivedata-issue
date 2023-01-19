@@ -103,9 +103,11 @@ public class CategoryRepository {
 	 * @return 検索されたカテゴリ詳細
 	 */
 	public CategoryDetail parentFindById(int categoryId) {
-		String sql = "select c3.id big_id,c3.name big_name,c2.id middle_id,c2.name middle_name,c1.id small_id,c1.name small_name from (select id,parent,name from category  where id=:categoryId) c1 join category c2 on c1.parent=c2.id join category c3 on c2.parent=c3.id;";
+		StringBuilder sql =new StringBuilder("SELECT c3.id big_id,c3.name big_name,c2.id middle_id,c2.name middle_name,");
+		sql.append("c1.id small_id,c1.name small_name FROM (SELECT id,parent,name FROM category  WHERE id=:categoryId) c1 ");
+		sql.append("JOIN category c2 ON c1.parent=c2.id JOIN category c3 ON c2.parent=c3.id;");
 		SqlParameterSource param = new MapSqlParameterSource().addValue("categoryId", categoryId);
-		CategoryDetail categoryDetail = template.queryForObject(sql, param, DETAIL_ROW_MAPPER);
+		CategoryDetail categoryDetail = template.queryForObject(sql.toString(), param, DETAIL_ROW_MAPPER);
 		return categoryDetail;
 	}
 

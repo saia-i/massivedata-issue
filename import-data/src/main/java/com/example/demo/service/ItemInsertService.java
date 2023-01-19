@@ -8,23 +8,35 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.Item;
 import com.example.demo.repository.ItemRepository;
 
+/**
+ * 商品情報を操作するサービス.
+ * 
+ * @author inagakisaia
+ *
+ */
 @Service
+@Transactional
 public class ItemInsertService {
 
 	@Autowired
 	private ItemRepository itemRepository;
 
-
+	/**
+	 * オリジナルテーブルから商品情報を全件挿入します.
+	 * 
+	 * @throws SQLException
+	 */
 	public void insertAllData() throws SQLException {
-
+		// オリジナルテーブルの情報を全件取得
 		List<Item> itemList = itemRepository.findAllJoinOriginal();
-		System.out.println("全件検索完了");
 
-		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari", "postgres", "postgres");
+		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari", "postgres",
+				"postgres");
 		String sql = "INSERT INTO items (name,condition_id,category,brand,price,shipping,description) VALUES(?,?,?,?,?,?,?);";
 		PreparedStatement statement = connection.prepareStatement(sql);
 
@@ -49,9 +61,9 @@ public class ItemInsertService {
 			statement.setString(7, item.getDescription());
 			statement.addBatch();
 			cnt++;
+			// 1万件ごとに挿入
 			if (cnt % 10000 == 0 || cnt == listCnt) {
 				statement.executeBatch();
-				System.out.println(cnt + "件終了");
 			}
 		}
 

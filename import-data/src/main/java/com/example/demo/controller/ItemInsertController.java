@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.demo.service.ItemInsertService;
 
+/**
+ * 商品情報を操作するコントローラー.
+ * 
+ * @author inagakisaia
+ *
+ */
 @Controller
 @RequestMapping("/itemInsert")
 public class ItemInsertController {
@@ -16,11 +22,16 @@ public class ItemInsertController {
 	@Autowired
 	private ItemInsertService itemInsertService;
 
-
+	/**
+	 * オリジナルテーブルの全データを商品テーブルに挿入します.
+	 * 
+	 * @return 完了画面にリダイレクト
+	 * @throws SQLException
+	 */
 	@GetMapping("/allData")
 	public String insertAllData() throws SQLException {
 		itemInsertService.insertAllData();
-		return "redirect:sample";
+		return "redirect:finished";
 	}
 
 }

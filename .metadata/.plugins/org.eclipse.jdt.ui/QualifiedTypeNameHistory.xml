@@ -1,2 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="org.springframework.boot.test.context.SpringBootTest"/>
+    <fullyQualifiedTypeName name="org.springframework.boot.autoconfigure.AutoConfiguration"/>
+    <fullyQualifiedTypeName name="com.example.demo.repository.UserRepository"/>
+    <fullyQualifiedTypeName name="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate"/>
+    <fullyQualifiedTypeName name="com.example.demo.domain.User"/>
+    <fullyQualifiedTypeName name="com.example.demo.service.ItemInsertService"/>
+    <fullyQualifiedTypeName name="com.example.demo.service.ShowDetailService"/>
+    <fullyQualifiedTypeName name="org.springframework.web.context.WebApplicationContext"/>
+    <fullyQualifiedTypeName name="org.junit.jupiter.api.BeforeEach"/>
+    <fullyQualifiedTypeName name="org.springframework.test.web.servlet.MockMvc"/>
+    <fullyQualifiedTypeName name="org.springframework.test.web.servlet.setup.MockMvcBuilders"/>
+    <fullyQualifiedTypeName name="com.example.demo.service.SelectCategoryService"/>
+    <fullyQualifiedTypeName name="org.springframework.test.web.servlet.MvcResult"/>
+    <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.ModelAttribute"/>
+    <fullyQualifiedTypeName name="org.springframework.boot.test.mock.mockito.MockBean"/>
+    <fullyQualifiedTypeName name="com.example.demo.repository.ItemRepository"/>
+    <fullyQualifiedTypeName name="org.junit.jupiter.api.DisplayName"/>
+    <fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+    <fullyQualifiedTypeName name="com.example.demo.form.InsertItemForm"/>
+    <fullyQualifiedTypeName name="java.lang.StringBuilder"/>
+</qualifiedTypeNameHistroy>

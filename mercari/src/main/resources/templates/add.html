@@ -93,7 +93,7 @@
 					<select class="form-control" th:field="*{middleId}">
 						<option value="0" selected>-- childCategory --</option>
 						<option th:each="middle:${middleList}" th:value="${middle.id}" th:text="${middle.name}">
-							childCategory1</option>
+							---</option>
 
 					</select>
 				</div>
@@ -103,7 +103,7 @@
 				<div class="col-sm-8">
 					<select class="form-control" th:field="*{category}">
 						<option value="0" selected>-- grandChild --</option>
-						<option th:each="small:${smallList}" th:value="${small.id}" th:text="${small.name}">grandChild1
+						<option th:each="small:${smallList}" th:value="${small.id}" th:text="${small.name}">---
 						</option>
 
 					</select>

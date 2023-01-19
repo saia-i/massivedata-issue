@@ -5,15 +5,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.Item;
 
+/**
+ * 商品情報を操作するリポジトリ.
+ * 
+ * @author inagakisaia
+ *
+ */
 @Repository
 public class ItemRepository {
 
@@ -22,19 +24,11 @@ public class ItemRepository {
 
 	private static final RowMapper<Item> ITEM_ROW_MAPPER = new BeanPropertyRowMapper<>(Item.class);
 
-	public Integer insertNewItem(Item item) {
-		String sql = "INSERT INTO items (name,condition_id,category,brand,price,description) VALUES(:name,:conditionId,:category,:brand,:price,:description);";
-		SqlParameterSource param = new BeanPropertySqlParameterSource(item);
-
-		// 採番されたidを取得する
-		KeyHolder keyHolder = new GeneratedKeyHolder();
-		String keyColumnNames[] = { "id" };
-		template.update(sql, param, keyHolder, keyColumnNames);
-		Integer id = keyHolder.getKey().intValue();
-
-		return id;
-	}
-
+	/**
+	 * オリジナルテーブルから10000件ごとにフェッチします.
+	 * 
+	 * @return 検索されたオリジナル情報
+	 */
 	public List<Item> findAllJoinOriginal() {
 		String sql = "SELECT o.id,o.name,o.condition_id,c.id category,o.brand,o.price,o.shipping,o.description FROM original o LEFT OUTER JOIN category c ON o.category_name=c.name_all ;";
 		template.getJdbcTemplate().setFetchSize(10000);

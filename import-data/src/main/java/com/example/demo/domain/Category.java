@@ -1,10 +1,20 @@
 package com.example.demo.domain;
 
+/**
+ * カテゴリ情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 public class Category {
 
+	/** ID */
 	private int id;
+	/** 親カテゴリID */
 	private Integer parent;
+	/** 名前 */
 	private String name;
+	/** パス */
 	private String nameAll;
 
 	public Category() {

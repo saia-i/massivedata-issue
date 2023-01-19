@@ -16,10 +16,8 @@ public class InsertItemForm {
 	@NotBlank(message = "error:may not be empty")
 	private String name;
 	/** 状態 */
-	@NotBlank(message = "error:may not be empty")
 	private String conditionId;
 	/** カテゴリID */
-	@NotBlank(message = "error:may not be empty")
 	private String category;
 	/** 親カテゴリID */
 	private String bigId;

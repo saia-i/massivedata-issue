@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.Big;
 import com.example.demo.domain.CategoryDetail;
 import com.example.demo.domain.Item;
 import com.example.demo.domain.Middle;
 import com.example.demo.domain.Small;
+import com.example.demo.form.SearchItemForm;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ItemRepository;
 
@@ -21,6 +23,7 @@ import com.example.demo.repository.ItemRepository;
  *
  */
 @Service
+@Transactional
 public class ShowItemService {
 
 	@Autowired
@@ -42,13 +45,47 @@ public class ShowItemService {
 	}
 
 	/**
-	 * 商品情報の総件数を取得します.
+	 * 検索内容に一致する商品情報を開始位置から30件取得します.
 	 * 
-	 * @return 総件数
+	 * @param form      入力情報を受け取るフォーム
+	 * @param brandName ブランド名
+	 * @param startId   取得する商品情報リストの開始位置
+	 * @return 商品リスト
 	 */
-	public int count() {
-		int count = itemRepository.count();
-		return count;
+	public List<Item> searchItemList(SearchItemForm form, String brandName, int startId) {
+		List<Item> itemList = new ArrayList<>();
+		// 未入力の場合は全件検索をさせる為、空文字をセットする
+		if (form.getBrand() == null) {
+			form.setBrand("");
+		}
+		if (form.getName() == null) {
+			form.setName("");
+		}
+
+		if (brandName != null) {// ブランドをクリックした場合
+			itemList = itemRepository.findByBrand(brandName, startId);
+			itemList = getPerfectItemList(itemList);
+
+		} else {// 検索フォームから検索した場合
+			if (form.getBigId() == null || form.getBigId().equals("0")) {// カテゴリ未選択
+				itemList = itemRepository.searchByNameAndBrand(form.getName(), form.getBrand(), startId);
+
+			} else if (form.getMiddleId().equals("0") || form.getMiddleId() == null) {// 親カテゴリのみ選択
+				itemList = itemRepository.searchItemOfBigCategory(Integer.parseInt(form.getBigId()), form.getName(),
+						form.getBrand(), startId);
+				itemList = getPerfectItemList(itemList);
+
+			} else if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {// 子カテゴリまで選択
+				itemList = itemRepository.searchItemOfMiddleCategory(Integer.parseInt(form.getMiddleId()),
+						form.getName(), form.getBrand(), startId);
+				itemList = getPerfectItemList(itemList);
+
+			} else {// 孫カテゴリまで選択
+				itemList = itemRepository.searchItemOfSmallCategory(Integer.parseInt(form.getCategoryId()),
+						form.getName(), form.getBrand(), startId);
+			}
+		}
+		return itemList;
 	}
 
 	/**
@@ -59,136 +96,6 @@ public class ShowItemService {
 	public List<Big> findBigAll() {
 		List<Big> bigList = categoryRepository.findBigAll();
 		return bigList;
-	}
-
-	/**
-	 * 商品の検索をし、開始位置から30件取得します.
-	 * 
-	 * @param category カテゴリID
-	 * @param name     名前
-	 * @param brand    ブランド名
-	 * @param startId  開始位置
-	 * @return 検索された商品情報
-	 */
-	public List<Item> showItemOfSmallCategory(Integer category, String name, String brand, int startId) {
-		List<Item> itemList = itemRepository.searchItemOfSmallCategory(category, name, brand, startId);
-		return itemList;
-	}
-
-	/**
-	 * 商品の検索をし、開始位置から30件取得します.
-	 * 
-	 * @param category カテゴリID
-	 * @param name     名前
-	 * @param brand    ブランド名
-	 * @param startId  開始位置
-	 * @return 検索された商品情報
-	 */
-	public List<Item> showItemOfMiddleCategory(Integer category, String name, String brand, int startId) {
-		List<Item> itemList = itemRepository.searchItemOfMiddleCategory(category, name, brand, startId);
-		List<Item> itemCategoryList = new ArrayList<>();
-		for (Item item : itemList) {
-			if (item.getCategory() != null) {
-				CategoryDetail categoryDetail = categoryRepository.parentFindById(item.getCategory());
-				item.setCategoryDetail(categoryDetail);
-				itemCategoryList.add(item);
-			}
-		}
-		return itemCategoryList;
-	}
-
-	/**
-	 * 商品の検索をし、開始位置から30件取得します.
-	 * 
-	 * @param category カテゴリID
-	 * @param name     名前
-	 * @param brand    ブランド名
-	 * @param startId  開始位置
-	 * @return 検索された商品情報
-	 */
-	public List<Item> showItemOfBigCategory(Integer category, String name, String brand, int startId) {
-		List<Item> itemList = itemRepository.searchItemOfBigCategory(category, name, brand, startId);
-		List<Item> itemCategoryList = new ArrayList<>();
-		for (Item item : itemList) {
-			if (item.getCategory() != null) {
-				CategoryDetail categoryDetail = categoryRepository.parentFindById(item.getCategory());
-				item.setCategoryDetail(categoryDetail);
-				itemCategoryList.add(item);
-			}
-		}
-		return itemCategoryList;
-	}
-
-	/**
-	 * 商品の検索をし、開始位置から30件取得します.
-	 * 
-	 * @param name    名前
-	 * @param brand   ブランド名
-	 * @param startId 開始位置
-	 * @return 検索された商品情報
-	 */
-	public List<Item> showItemByNameAndBrand(String name, String brand, int startId) {
-		List<Item> itemList = itemRepository.searchByNameAndBrand(name, brand, startId);
-		List<Item> itemCategoryList = new ArrayList<>();
-		for (Item item : itemList) {
-			if (item.getCategory() != null) {
-				CategoryDetail categoryDetail = categoryRepository.parentFindById(item.getCategory());
-				item.setCategoryDetail(categoryDetail);
-				itemCategoryList.add(item);
-			}
-		}
-		return itemCategoryList;
-	}
-
-	/**
-	 * 検索された情報の総件数を取得します.
-	 * 
-	 * @param category カテゴリID
-	 * @param name     名前
-	 * @param brand    ブランド名
-	 * @return 総数
-	 */
-	public int countItemByMiddleCategory(Integer category, String name, String brand) {
-		int count = itemRepository.countItemByMiddleCategory(category, name, brand);
-		return count;
-	}
-
-	/**
-	 * 検索された情報の総件数を取得します.
-	 * 
-	 * @param category カテゴリID
-	 * @param name     名前
-	 * @param brand    ブランド名
-	 * @return 総数
-	 */
-	public int countItemBySmallCategory(Integer category, String name, String brand) {
-		int count = itemRepository.countItemBySmallCategory(category, name, brand);
-		return count;
-	}
-
-	/**
-	 * 検索された情報の総件数を取得します.
-	 * 
-	 * @param category カテゴリID
-	 * @param name     名前
-	 * @param brand    ブランド名
-	 * @return 総数
-	 */
-	public int countItemByBigCategory(Integer category, String name, String brand) {
-		int count = itemRepository.countItemByBigCategory(category, name, brand);
-		return count;
-	}
-
-	/**
-	 * 検索された情報の総件数を取得します.
-	 * 
-	 * @param name  名前
-	 * @param brand ブランド名
-	 * @return 総数
-	 */
-	public int countItemByNameAndBrand(String name, String brand) {
-		int count = itemRepository.CountItemByNameAndBrand(name, brand);
-		return count;
 	}
 
 	/**
@@ -214,33 +121,21 @@ public class ShowItemService {
 	}
 
 	/**
-	 * ブランド名から商品情報を取得します.
+	 * itemListの各itemにカテゴリ情報をセットします.
 	 * 
-	 * @param brand   ブランド名
-	 * @param startId 開始位置
-	 * @return 検索された商品情報
+	 * @param itemList 検索されたitemList
+	 * @return カテゴリ情報の入ったitemList
 	 */
-	public List<Item> showItemByBrand(String brand, int startId) {
-		List<Item> itemList = itemRepository.findByBrand(brand, startId);
-		List<Item> itemCategoryList = new ArrayList<>();
+	public List<Item> getPerfectItemList(List<Item> itemList) {
+		List<Item> perfectItemList = new ArrayList<>();
 		for (Item item : itemList) {
 			if (item.getCategory() != null) {
 				CategoryDetail categoryDetail = categoryRepository.parentFindById(item.getCategory());
 				item.setCategoryDetail(categoryDetail);
-				itemCategoryList.add(item);
 			}
+			perfectItemList.add(item);
 		}
-		return itemCategoryList;
+		return perfectItemList;
 	}
 
-	/**
-	 * 検索された商品情報の総件数を取得します.
-	 * 
-	 * @param brand ブランド名
-	 * @return 総数
-	 */
-	public int countByBrand(String brand) {
-		int count = itemRepository.countByBrand(brand);
-		return count;
-	}
 }

@@ -79,6 +79,8 @@
         <div class="form-group"></div>
         <button type="submit" class="btn btn-default"><i class="fa fa-angle-double-right"></i> search</button>
       </form>
+      <div th:if="${noSearch}"><span th:text="${noSearch}" style="font-size:15px; color:rgb(233, 76, 37)">No results, please try another search.</span><br>
+       →→→<a th:href="@{/}">to TopPage</a></div>
     </div>
 
     <!-- pagination -->
@@ -93,6 +95,7 @@
 
     <!-- table -->
     <div class="table-responsive">
+    
       <table id="item-table" class="table table-hover table-condensed">
         <thead>
           <tr>
@@ -107,7 +110,13 @@
           <tr th:each="item:${itemList}">
             <td class="item-name" ><a th:href="@{/showDetail}+'?id='+${item.id}" th:text="${item.name}">Razer BlackWidow Chroma Keyboard</a></td>
             <td class="item-price" th:text="${item.price}">52.0</td>
-            <td class="item-category"><a th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId=0&categoryId=0'" th:text="${item.categoryDetail.bigName}">Electronics</a> / <a th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId='+${item.categoryDetail.middleId}+'&categoryId=0'"  th:text="${item.categoryDetail.middleName}">Computers &amp; Tablets</a> / <a  th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId='+${item.categoryDetail.middleId}+'&categoryId='+${item.categoryDetail.smallId}"  th:text="${item.categoryDetail.smallName}">Components &amp; Parts</a></td>
+            <td class="item-category" >
+            <span th:if="${item.categoryDetail!=null}">
+            <a th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId=0&categoryId=0'" th:text="${item.categoryDetail.bigName}">Electronics</a> / 
+            <a th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId='+${item.categoryDetail.middleId}+'&categoryId=0'"  th:text="${item.categoryDetail.middleName}">Computers &amp; Tablets</a> / 
+            <a  th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId='+${item.categoryDetail.middleId}+'&categoryId='+${item.categoryDetail.smallId}"  th:text="${item.categoryDetail.smallName}">Components &amp; Parts</a>
+            </span>
+            </td>
             <td class="item-brand"><a th:href="@{/search}+'?brandName='+${item.brand}" th:text="${item.brand}">Razer</a></td>
             <td class="item-condition" th:text="${item.conditionId}">3</td>
           </tr>

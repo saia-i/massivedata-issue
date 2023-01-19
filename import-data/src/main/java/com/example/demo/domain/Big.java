@@ -2,9 +2,19 @@ package com.example.demo.domain;
 
 import java.util.List;
 
+/**
+ * 親カテゴリ情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 public class Big {
+
+	/** ID */
 	private int id;
+	/** 名前 */
 	private String name;
+	/** 子カテゴリリスト */
 	private List<Middle> middle;
 
 	public Big() {

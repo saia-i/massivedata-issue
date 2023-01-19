@@ -7,6 +7,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.demo.service.CategoryInsertService;
 
+/**
+ * カテゴリ情報を操作するコントローラー.
+ * 
+ * @author inagakisaia
+ *
+ */
 @Controller
 @RequestMapping("/category")
 public class CategoryInsertController {
@@ -14,11 +20,16 @@ public class CategoryInsertController {
 	@Autowired
 	private CategoryInsertService categoryInsertService;
 
+	/**
+	 * カテゴリを挿入します.
+	 * 
+	 * @return 終了画面
+	 */
 	@GetMapping("/insert")
 	public String insert() {
-		categoryInsertService.findByCategoryName();
+		categoryInsertService.insertCategory();
 
-		return "sample";
+		return "finished";
 	}
 
 }

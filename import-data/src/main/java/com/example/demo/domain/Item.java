@@ -1,14 +1,28 @@
 package com.example.demo.domain;
 
+/**
+ * 商品情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
 public class Item {
 
+	/** ID */
 	private int id;
+	/** 名前 */
 	private String name;
+	/** 状態 */
 	private Integer conditionId;
+	/** カテゴリ */
 	private Integer category;
+	/** ブランド */
 	private String brand;
+	/** 価格 */
 	private double price;
+	/** 配送情報 */
 	private Integer shipping;
+	/** 説明 */
 	private String description;
 
 	@Override

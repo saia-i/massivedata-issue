@@ -10,19 +10,29 @@ public class SearchItemForm {
 
 	/** 名前 */
 	private String name;
-	/** 親カテゴリID */
-	private String bigId;
-	/** 子カテゴリID */
-	private String middleId;
+	/** 親カテゴリ名 */
+	private String bigName;
+	/** 子カテゴリ名 */
+	private String middleName;
 	/** 孫カテゴリID */
 	private String categoryId;
+	/** 孫カテゴリ名 */
+	private String smallName;
 	/** ブランド名 */
 	private String brand;
 
 	@Override
 	public String toString() {
-		return "SearchItemForm [name=" + name + ", bigId=" + bigId + ", middleId=" + middleId + ", categoryId="
-				+ categoryId + ", brand=" + brand + "]";
+		return "SearchItemForm [name=" + name + ", bigName=" + bigName + ", middleName=" + middleName + ", categoryId="
+				+ ", smallName=" + smallName + categoryId + ", brand=" + brand + "]";
+	}
+
+	public String getSmallName() {
+		return smallName;
+	}
+
+	public void setSmallName(String smallName) {
+		this.smallName = smallName;
 	}
 
 	public String getName() {
@@ -33,20 +43,20 @@ public class SearchItemForm {
 		this.name = name;
 	}
 
-	public String getBigId() {
-		return bigId;
+	public String getBigName() {
+		return bigName;
 	}
 
-	public void setBigId(String bigId) {
-		this.bigId = bigId;
+	public void setBigName(String bigName) {
+		this.bigName = bigName;
 	}
 
-	public String getMiddleId() {
-		return middleId;
+	public String getMiddleName() {
+		return middleName;
 	}
 
-	public void setMiddleId(String middleId) {
-		this.middleId = middleId;
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
 	}
 
 	public String getCategoryId() {

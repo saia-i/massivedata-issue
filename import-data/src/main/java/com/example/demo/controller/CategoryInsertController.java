@@ -25,10 +25,10 @@ public class CategoryInsertController {
 	 * 
 	 * @return 終了画面
 	 */
-	@GetMapping("/insert")
-	public String insert() {
-		categoryInsertService.insertCategory();
-
+	@GetMapping("/insert2")
+	public String insert2() {
+		categoryInsertService.insertCategories();
+		
 		return "finished";
 	}
 

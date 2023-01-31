@@ -52,24 +52,24 @@
 
     <!-- 検索フォーム -->
     <div id="forms">
-      <form th:action="@{/search}" method="post" class="form-inline" role="form" th:object="${searchItemForm}"　>
+      <form th:action="@{/search}" method="post" class="form-inline" th:object="${searchItemForm}"　>
+      <input type="hidden" name="brandId" value="0"> 
         <div class="form-group">
           <input class="form-control" placeholder="item name" th:field="*{name}" />
         </div>
         <div class="form-group"><i class="fa fa-plus"></i></div>
         <div class="form-group">
-          <select class="form-control" th:field="*{bigId}" >
+          <select class="form-control" th:field="*{bigName}" >
             <option selected value="0"  >-- parentCategory --</option>
-            <option th:each="big:${bigList}" th:value="${big.id}" th:text="${big.name}">parentCategory1</option>
+            <option th:each="big:${bigList}" th:value="${big}" th:text="${big}">parentCategory1</option>
           </select>
-          <select class="form-control" th:field="*{middleId}" >
-            <option th:unless="${middleList}" value="0" selected>-- childCategory --</option>
-            <option th:unless="*{bigId}" th:value="*{bigId}"  selected>-- childCategory --</option>
-            <option th:each="middle:${middleList}" th:value="${middle.id}" th:text="${middle.name}">childCategory1</option>
+          <select class="form-control" th:field="*{middleName}" >
+            <option  value="0" selected>-- childCategory --</option>
+            <option th:each="middle:${middleList}" th:value="${middle.name}" th:text="${middle.name}">childCategory1</option>
           </select>
-          <select class="form-control" th:field="*{categoryId}" >
+          <select class="form-control" th:field="*{smallName}" >
             <option value="0"  selected >-- grandChild --</option>
-            <option th:each="small:${smallList}" th:value="${small.id}" th:text="${small.name}">grandChild1</option>
+            <option th:each="small:${smallList}" th:value="${small.name}" th:text="${small.name}">grandChild1</option>
           </select>
         </div>
         <div class="form-group"><i class="fa fa-plus"></i></div>
@@ -88,7 +88,7 @@
       <nav class="page-nav">
         <ul class="pager">
           <li class="previous" th:unless="${session.nowPage}==1"><a th:href="@{/toPage}+'?page='+${session.nowPage-1}">&larr; prev</a></li>
-          <li class="next" th:unless="${session.nowPage}==${session.pageCnt}"><a th:href="@{/toPage}+'?page='+${session.nowPage+1}">next &rarr;</a></li>
+          <li class="next" th:unless="${session.nowPage==session.pageCnt||session.pageCnt==0}"><a th:href="@{/toPage}+'?page='+${session.nowPage+1}">next &rarr;</a></li>
         </ul>
       </nav>
     </div>
@@ -112,13 +112,13 @@
             <td class="item-price" th:text="${item.price}">52.0</td>
             <td class="item-category" >
             <span th:if="${item.categoryDetail!=null}">
-            <a th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId=0&categoryId=0'" th:text="${item.categoryDetail.bigName}">Electronics</a> / 
-            <a th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId='+${item.categoryDetail.middleId}+'&categoryId=0'"  th:text="${item.categoryDetail.middleName}">Computers &amp; Tablets</a> / 
-            <a  th:href="@{/search}+'?bigId='+${item.categoryDetail.bigId}+'&middleId='+${item.categoryDetail.middleId}+'&categoryId='+${item.categoryDetail.smallId}"  th:text="${item.categoryDetail.smallName}">Components &amp; Parts</a>
+            <a th:href="${'/search?bigName='+item.encodedBigName}" th:text="${item.categoryDetail.bigName}">Electronics</a> / 
+            <a th:href="@{/search}+'?bigName='+${item.encodedBigName}+'&middleName='+${item.encodedMiddleName}"  th:text="${item.categoryDetail.middleName}">Computers &amp; Tablets</a> / 
+            <a  th:href="@{/search}+'?bigName='+${item.encodedBigName}+'&middleName='+${item.encodedMiddleName}+'&smallName='+${item.encodedSmallName}"  th:text="${item.categoryDetail.smallName}">Components &amp; Parts</a>
             </span>
             </td>
-            <td class="item-brand"><a th:href="@{/search}+'?brandName='+${item.brand}" th:text="${item.brand}">Razer</a></td>
-            <td class="item-condition" th:text="${item.conditionId}">3</td>
+            <td class="item-brand"><a th:href="@{/search}+'?brandId='+${item.brandId}" th:text="${item.brandName}">Razer</a></td>
+            <td class="item-condition" th:text="${T(com.example.demo.common.Conditions).of(item.conditionId).getKey()}">3</td>
           </tr>
          
         </tbody>
@@ -130,7 +130,7 @@
       <nav class="page-nav">
         <ul class="pager">
           <li class="previous" th:unless="${session.nowPage}==1"><a th:href="@{/toPage}+'?page='+${session.nowPage-1}">&larr; prev</a></li>
-          <li class="next" th:unless="${session.nowPage}==${session.pageCnt}"><a th:href="@{/toPage}+'?page='+${session.nowPage+1}">next &rarr;</a></li>
+          <li class="next" th:unless="${session.nowPage==session.pageCnt||session.pageCnt==0}"><a th:href="@{/toPage}+'?page='+${session.nowPage+1}">next &rarr;</a></li>
         </ul>
       </nav>
       <!-- ページ番号を指定して表示するフォーム -->

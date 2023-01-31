@@ -17,12 +17,12 @@ public class InsertItemForm {
 	private String name;
 	/** 状態 */
 	private String conditionId;
-	/** カテゴリID */
-	private String category;
-	/** 親カテゴリID */
-	private String bigId;
-	/** 子カテゴリID */
-	private String middleId;
+	/** 小カテゴリ名 */
+	private String smallName;
+	/** 大カテゴリ名 */
+	private String bigName;
+	/** 中カテゴリ名 */
+	private String middleName;
 	/** ブランド名 */
 	private String brand;
 	/** 価格 */
@@ -56,28 +56,28 @@ public class InsertItemForm {
 		this.conditionId = conditionId;
 	}
 
-	public String getCategory() {
-		return category;
+	public String getSmallName() {
+		return smallName;
 	}
 
-	public void setCategory(String category) {
-		this.category = category;
+	public void setSmallName(String smallName) {
+		this.smallName = smallName;
 	}
 
-	public String getBigId() {
-		return bigId;
+	public String getBigName() {
+		return bigName;
 	}
 
-	public void setBigId(String bigId) {
-		this.bigId = bigId;
+	public void setBigName(String bigName) {
+		this.bigName = bigName;
 	}
 
-	public String getMiddleId() {
-		return middleId;
+	public String getMiddleName() {
+		return middleName;
 	}
 
-	public void setMiddleId(String middleId) {
-		this.middleId = middleId;
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
 	}
 
 	public String getBrand() {
@@ -114,9 +114,9 @@ public class InsertItemForm {
 
 	@Override
 	public String toString() {
-		return "InsertItemForm [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", category=" + category
-				+ ", bigId=" + bigId + ", middleId=" + middleId + ", brand=" + brand + ", price=" + price
-				+ ", shipping=" + shipping + ", description=" + description + "]";
+		return "InsertItemForm [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", smallName="
+				+ smallName + ", bigName=" + bigName + ", middleName=" + middleName + ", brand=" + brand + ", price="
+				+ price + ", shipping=" + shipping + ", description=" + description + "]";
 	}
 
 }

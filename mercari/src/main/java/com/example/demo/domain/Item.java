@@ -1,5 +1,8 @@
 package com.example.demo.domain;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * 商品情報を表すドメイン.
  * 
@@ -15,11 +18,13 @@ public class Item {
 	/** 状態 */
 	private Integer conditionId;
 	/** カテゴリID */
-	private Integer category;
+	private Integer categoryId;
 	/** カテゴリ詳細 */
 	private CategoryDetail categoryDetail;
 	/** ブランド */
-	private String brand;
+	private Integer brandId;
+	/** ブランド名 */
+	private String brandName;
 	/** 価格 */
 	private double price;
 	/** 配送情報 */
@@ -29,11 +34,27 @@ public class Item {
 	/** 総数 */
 	private int count;
 
-	@Override
-	public String toString() {
-		return "Item [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", category=" + category
-				+ ", categoryDetail=" + categoryDetail + ", brand=" + brand + ", price=" + price + ", shipping="
-				+ shipping + ", description=" + description + ", count=" + count + "]";
+	public String encodedBigName() throws UnsupportedEncodingException {
+		String encodedResult = URLEncoder.encode(this.getCategoryDetail().getBigName(), "UTF-8");
+		return encodedResult;
+	}
+
+	public String encodedMiddleName() throws UnsupportedEncodingException {
+		String encodedResult = URLEncoder.encode(this.getCategoryDetail().getMiddleName(), "UTF-8");
+		return encodedResult;
+	}
+
+	public String encodedSmallName() throws UnsupportedEncodingException {
+		String encodedResult = URLEncoder.encode(this.getCategoryDetail().getSmallName(), "UTF-8");
+		return encodedResult;
+	}
+
+	public Integer getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public int getCount() {
@@ -42,14 +63,6 @@ public class Item {
 
 	public void setCount(int count) {
 		this.count = count;
-	}
-
-	public Integer getCategory() {
-		return category;
-	}
-
-	public void setCategory(Integer category) {
-		this.category = category;
 	}
 
 	public int getId() {
@@ -84,12 +97,28 @@ public class Item {
 		this.categoryDetail = categoryDetail;
 	}
 
-	public String getBrand() {
-		return brand;
+	@Override
+	public String toString() {
+		return "Item [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", categoryId=" + categoryId
+				+ ", categoryDetail=" + categoryDetail + ", brandId=" + brandId + ", brandName=" + brandName
+				+ ", price=" + price + ", shipping=" + shipping + ", description=" + description + ", count=" + count
+				+ "]";
 	}
 
-	public void setBrand(String brand) {
-		this.brand = brand;
+	public Integer getBrandId() {
+		return brandId;
+	}
+
+	public void setBrandId(Integer brandId) {
+		this.brandId = brandId;
+	}
+
+	public String getBrandName() {
+		return brandName;
+	}
+
+	public void setBrandName(String brandName) {
+		this.brandName = brandName;
 	}
 
 	public double getPrice() {

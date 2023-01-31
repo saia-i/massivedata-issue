@@ -1,0 +1,27 @@
+package com.example.demo.domain;
+
+public class ShowItem {
+
+	/** ID */
+	private int id;
+	/** 名前 */
+	private String name;
+	/** 状態 */
+	private Integer conditionId;
+	/** カテゴリID */
+	private Integer categoryId;
+	/** カテゴリ詳細 */
+	private CategoryDetail categoryDetail;
+	/** ブランドID */
+	private Integer brandId;
+	/** ブランド名 */
+	private String brandName;
+	/** 価格 */
+	private double price;
+	/** 配送情報 */
+	private Integer shipping;
+	/** 説明 */
+	private String description;
+	/** 総数 */
+	private int count;
+}

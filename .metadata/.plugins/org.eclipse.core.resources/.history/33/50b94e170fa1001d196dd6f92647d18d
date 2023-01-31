@@ -1,0 +1,173 @@
+package com.example.demo.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import com.example.demo.domain.Category;
+import com.example.demo.domain.Item;
+import com.example.demo.form.SearchItemForm;
+import com.example.demo.service.SelectCategoryService;
+import com.example.demo.service.ShowItemService;
+
+/**
+ * 商品情報を操作するコントローラー.
+ * 
+ * @author inagakisaia
+ *
+ */
+@Controller
+@RequestMapping("/")
+@SessionAttributes(types = SearchItemForm.class)
+public class ShowItemController {
+
+	@Autowired
+	private ShowItemService showItemService;
+	
+	@Autowired
+	private SelectCategoryService selectCategoryService;
+
+	@Autowired
+	private HttpSession session;
+
+	@ModelAttribute("searchItemForm")
+	public SearchItemForm setUpSearchItemForm() {
+		return new SearchItemForm();
+	}
+
+	// １ページあたりに表示する商品数
+	private final int NUMBER_OF_ITEMS = 30;
+
+	/**
+	 * トップページの表示を行います.
+	 * 
+	 * @return 商品一覧画面
+	 */
+	@GetMapping("")
+	public String showTopPage(Model model, SessionStatus sessionStatus) {
+		sessionStatus.setComplete();
+
+		List<String> bigList = selectCategoryService.findBigAll();
+		model.addAttribute("bigList", bigList);
+
+		// 最初のページを表示するためのitemListを取得
+		List<Item> itemList = showItemService.showList(0);
+		model.addAttribute("itemList", itemList);
+
+		// 総ページ数を算出
+		int count = itemList.get(0).getCount();
+		int pageCnt = (count - 1) / NUMBER_OF_ITEMS + 1;
+		session.setAttribute("pageCnt", pageCnt);
+		session.setAttribute("nowPage", 1);
+		return "list";
+	}
+
+	/**
+	 * 指定のページ数の商品一覧画面に遷移します.
+	 * 
+	 * @param form  検索フォームの情報を受け取るフォーム
+	 * @param brand ブランド名
+	 * @param page  ページ数
+	 * @return 商品一覧画面
+	 */
+	@RequestMapping("/toPage")
+	public String toPage(@ModelAttribute("searchItemForm") SearchItemForm form, int page, Model model) {
+
+		session.setAttribute("nowPage", page);
+
+		// 表示するitemListの始まりの値
+		int firstId = (page - 1) * NUMBER_OF_ITEMS;
+
+		String brand = null;
+		if (session.getAttribute("brandName") != null) {
+			brand = session.getAttribute("brandName").toString();
+		}
+		// 商品検索
+		List<Item> itemList = showItemService.searchItemList(form, brand, firstId);
+
+		if (brand != null) {
+			session.setAttribute("brandName", brand);
+		} else if (form.getBigName() != null && !form.getBigName().equals("0")) {
+			// category選択していた場合は該当のリストを保持するために検索しモデルにセット
+			List<Category> middleList = new ArrayList<>();
+			if (form.getCategoryId() == null || form.getCategoryId().equals("0")) {
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
+				model.addAttribute("middleList", middleList);
+			} else {
+				List<Category> smallList = new ArrayList<>();
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
+				model.addAttribute("middleList", middleList);
+				smallList = selectCategoryService.getChildList(form.getBigName() + "/" + form.getMiddleName() + "/", 3);
+				model.addAttribute("smallList", smallList);
+			}
+		}
+		model.addAttribute("itemList", itemList);
+
+		// 検索フォームの親カテゴリリスト
+		List<String> bigList = selectCategoryService.findBigAll();
+		model.addAttribute("bigList", bigList);
+
+		return "list";
+	}
+
+	/**
+	 * 検索された商品情報から、商品一覧画面の１ページ目を表示します.
+	 * 
+	 * @param form      入力された情報を受け取るフォーム
+	 * @param brandId ブランド名
+	 * @return 商品一覧画面
+	 */
+	@RequestMapping("/search")
+	public String searchItemList(@ModelAttribute("searchItemForm") SearchItemForm form, int brandId, Model model) {
+		session.removeAttribute("brandName");
+
+		// 受け取った値から商品を検索
+		List<Item> itemList = showItemService.searchItemList(form, brandId, 0);
+
+		if (brandId != 0) {// ブランド名をクリックしていた場合はsessionにセット
+			session.setAttribute("brandName", brandId);
+		} else if (!form.getBigName().equals("0")) {
+			// category選択していた場合は該当のリストを保持するために検索しモデルにセット
+			List<Category> middleList = new ArrayList<>();
+			if (form.getSmallName() == null || form.getSmallName().equals("0")) {
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
+				model.addAttribute("middleList", middleList);
+			} else {
+				List<Category> smallList = new ArrayList<>();
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
+				model.addAttribute("middleList", middleList);
+				smallList = selectCategoryService.getChildList(form.getBigName() + "/" + form.getMiddleName() + "/", 3);
+				model.addAttribute("smallList", smallList);
+			}
+		}
+		model.addAttribute("itemList", itemList);
+
+		int count = 0;
+		int pageCnt = 0;
+		if (itemList.size() > 0) {// 検索結果あり -> ページ数を算出
+			count = itemList.get(0).getCount();
+			pageCnt = (count - 1) / NUMBER_OF_ITEMS + 1;
+		} else {// 検索結果なし -> HTMLで表示させる文言をモデルにセット
+			model.addAttribute("noSearch", "No results, please try another search.");
+		}
+		session.setAttribute("pageCnt", pageCnt);
+		session.setAttribute("nowPage", 1);
+
+		// 検索フォームの親カテゴリリスト
+		List<String> bigList = selectCategoryService.findBigAll();
+		model.addAttribute("bigList", bigList);
+
+		return "list";
+	}
+
+}

@@ -33,7 +33,7 @@ public class ItemInsertServiceTest {
 		form.setName("name");
 		form.setBrand("brand");
 		form.setConditionId("1");
-		form.setCategory("100");
+		form.setSmallName("100");
 		form.setPrice("9.9");
 
 		int result = insertService.insertItem(form);

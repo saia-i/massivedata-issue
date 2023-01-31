@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
-import com.example.demo.domain.Big;
+import com.example.demo.domain.Category;
 import com.example.demo.domain.Item;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
 import com.example.demo.form.SearchItemForm;
+import com.example.demo.service.SelectCategoryService;
 import com.example.demo.service.ShowItemService;
 
 /**
@@ -34,6 +33,9 @@ public class ShowItemController {
 
 	@Autowired
 	private ShowItemService showItemService;
+
+	@Autowired
+	private SelectCategoryService selectCategoryService;
 
 	@Autowired
 	private HttpSession session;
@@ -55,7 +57,7 @@ public class ShowItemController {
 	public String showTopPage(Model model, SessionStatus sessionStatus) {
 		sessionStatus.setComplete();
 
-		List<Big> bigList = showItemService.findBigAll();
+		List<String> bigList = selectCategoryService.findBigAll();
 		model.addAttribute("bigList", bigList);
 
 		// 最初のページを表示するためのitemListを取得
@@ -86,33 +88,36 @@ public class ShowItemController {
 		// 表示するitemListの始まりの値
 		int firstId = (page - 1) * NUMBER_OF_ITEMS;
 
-		String brand = null;
-		if (session.getAttribute("brandName") != null) {
-			brand = session.getAttribute("brandName").toString();
+		int brandId = 0;
+		if (session.getAttribute("brandId") != null) {
+			brandId = (int) session.getAttribute("brandId");
 		}
-		//商品検索
-		List<Item> itemList = showItemService.searchItemList(form, brand, firstId);
+		// 商品検索
+		List<Item> itemList = showItemService.searchItemList(form, brandId, firstId);
 
-		if (brand != null) {
-			session.setAttribute("brandName", brand);
-		} else if (form.getBigId() != null && !form.getBigId().equals("0")) {
-			//category選択していた場合は該当のリストを保持するために検索しモデルにセット
-			List<Middle> middleList = new ArrayList<>();
-			if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {
-				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
+		if (brandId != 0) { // brandのリンクをクリック時 -> セッションにIDを格納（ページ遷移時に値を保持するため）
+			session.setAttribute("brandId", brandId);
+
+		} else if (form.getBigName() != null && !form.getBigName().equals("0")) {
+			// category選択時 -> 該当のリストを保持するために検索しモデルにセット
+			List<Category> middleList = new ArrayList<>();
+
+			if (form.getCategoryId() == null || form.getCategoryId().equals("0")) {
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
 				model.addAttribute("middleList", middleList);
+
 			} else {
-				List<Small> smallList = new ArrayList<>();
-				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
+				List<Category> smallList = new ArrayList<>();
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
 				model.addAttribute("middleList", middleList);
-				smallList = showItemService.showSmallListByParent(Integer.parseInt(form.getMiddleId()));
+				smallList = selectCategoryService.getChildList(form.getBigName() + "/" + form.getMiddleName() + "/", 3);
 				model.addAttribute("smallList", smallList);
 			}
 		}
 		model.addAttribute("itemList", itemList);
 
 		// 検索フォームの親カテゴリリスト
-		List<Big> bigList = showItemService.findBigAll();
+		List<String> bigList = selectCategoryService.findBigAll();
 		model.addAttribute("bigList", bigList);
 
 		return "list";
@@ -121,30 +126,31 @@ public class ShowItemController {
 	/**
 	 * 検索された商品情報から、商品一覧画面の１ページ目を表示します.
 	 * 
-	 * @param form      入力された情報を受け取るフォーム
-	 * @param brandName ブランド名
+	 * @param form    入力された情報を受け取るフォーム
+	 * @param brandId ブランド名
 	 * @return 商品一覧画面
 	 */
 	@RequestMapping("/search")
-	public String searchItemList(@ModelAttribute("searchItemForm") SearchItemForm form, String brandName, Model model) {
-		session.removeAttribute("brandName");
+	public String searchItemList(@ModelAttribute("searchItemForm") SearchItemForm form, int brandId, Model model) {
+		session.removeAttribute("brandId");
 
 		// 受け取った値から商品を検索
-		List<Item> itemList = showItemService.searchItemList(form, brandName, 0);
+		List<Item> itemList = showItemService.searchItemList(form, brandId, 0);
 
-		if (brandName != null) {// ブランド名をクリックしていた場合はsessionにセット
-			session.setAttribute("brandName", brandName);
-		} else if (!form.getBigId().equals("0")) {
-			//category選択していた場合は該当のリストを保持するために検索しモデルにセット
-			List<Middle> middleList = new ArrayList<>();
-			if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {
-				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
+		if (brandId != 0) { // brandのリンクをクリック時 -> セッションにIDを格納（ページ遷移時に値を保持するため）
+			session.setAttribute("brandId", brandId);
+
+		} else if (!form.getBigName().equals("0")) {
+			// category選択時 -> 該当のリストを保持するために検索しモデルにセット
+			List<Category> middleList = new ArrayList<>();
+			if (form.getSmallName() == null || form.getSmallName().equals("0")) {
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
 				model.addAttribute("middleList", middleList);
 			} else {
-				List<Small> smallList = new ArrayList<>();
-				middleList = showItemService.showMiddleListByParent(Integer.parseInt(form.getBigId()));
+				List<Category> smallList = new ArrayList<>();
+				middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
 				model.addAttribute("middleList", middleList);
-				smallList = showItemService.showSmallListByParent(Integer.parseInt(form.getMiddleId()));
+				smallList = selectCategoryService.getChildList(form.getBigName() + "/" + form.getMiddleName() + "/", 3);
 				model.addAttribute("smallList", smallList);
 			}
 		}
@@ -152,17 +158,17 @@ public class ShowItemController {
 
 		int count = 0;
 		int pageCnt = 0;
-		if (itemList.size() > 0) {// 検索結果あり->ページ数を算出
+		if (itemList.size() > 0) { // 検索結果あり -> ページ数を算出
 			count = itemList.get(0).getCount();
 			pageCnt = (count - 1) / NUMBER_OF_ITEMS + 1;
-		} else {// 検索結果なし->HTMLで表示させる文言をモデルにセット
+		} else {// 検索結果なし -> HTMLで表示させる文言をモデルにセット
 			model.addAttribute("noSearch", "No results, please try another search.");
 		}
 		session.setAttribute("pageCnt", pageCnt);
 		session.setAttribute("nowPage", 1);
 
 		// 検索フォームの親カテゴリリスト
-		List<Big> bigList = showItemService.findBigAll();
+		List<String> bigList = selectCategoryService.findBigAll();
 		model.addAttribute("bigList", bigList);
 
 		return "list";

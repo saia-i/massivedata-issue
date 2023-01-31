@@ -1,23 +1,17 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.domain.Big;
 import com.example.demo.domain.Category;
-import com.example.demo.domain.CategoryDetail;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
 
 /**
  * カテゴリ情報を操作するリポジトリ.
@@ -33,82 +27,22 @@ public class CategoryRepository {
 
 	private static final RowMapper<Category> CATEGORY_ROW_MAPPER = new BeanPropertyRowMapper<>(Category.class);
 
-	private static final RowMapper<CategoryDetail> DETAIL_ROW_MAPPER = new BeanPropertyRowMapper<>(
-			CategoryDetail.class);
-
-	private static final RowMapper<Big> BIG_ROW_MAPPER = (rs, i) -> {
-		Big big = new Big();
-		big.setId(rs.getInt("id"));
-		big.setName(rs.getString("name"));
-		return big;
+	private static final RowMapper<String> BIG_ROW_MAPPER = (rs, i) -> {
+		return rs.getString("name");
 	};
 
-	private static final RowMapper<Middle> MIDDLE_ROW_MAPPER = new BeanPropertyRowMapper<>(Middle.class);
-
-	private static final RowMapper<Small> SMALL_ROW_MAPPER = new BeanPropertyRowMapper<>(Small.class);
-
 	/**
-	 * カテゴリーを挿入します.
+	 * パスからカテゴリIDを検索します.
 	 * 
-	 * @param category カテゴリ情報
-	 * @return インサートしたカテゴリーのID
+	 * @param path パス
+	 * @return 検索されたカテゴリID
 	 */
-	public Integer insert(Category category) {
-		String sql = "INSERT INTO category (parent,name,name_all) VALUES(:parent,:name,:nameAll)";
-		SqlParameterSource param = new BeanPropertySqlParameterSource(category);
-		KeyHolder keyHolder = new GeneratedKeyHolder();
-		String keyColumnNames[] = { "id" };
-		template.update(sql, param, keyHolder, keyColumnNames);
-		Integer id = keyHolder.getKey().intValue();
-		return id;
-	}
-
-	/**
-	 * カテゴリ情報を一件検索します.
-	 * 
-	 * @param id カテゴリID
-	 * @return 検索されたカテゴリ情報
-	 */
-	public Category load(int id) {
-		String sql = "SELECT id,parent,name,name_all FROM category WHERE id=:id;";
-		SqlParameterSource param = new MapSqlParameterSource().addValue("id", id);
-		List<Category> categoryList = template.query(sql, param, CATEGORY_ROW_MAPPER);
-		if (categoryList.size() == 0) {
-			return null;
-		}
-		return categoryList.get(0);
-	}
-
-	/**
-	 * パスからカテゴリ情報を検索します.
-	 * 
-	 * @param nameAll パス
-	 * @return 検索されたカテゴリ情報
-	 */
-	public int findByNameAll(String nameAll) {
-		String sql = "SELECT id FROM category WHERE name_all=:nameAll;";
-		SqlParameterSource param = new MapSqlParameterSource().addValue("nameAll", nameAll);
-		List<Category> categoryList = template.query(sql, param, CATEGORY_ROW_MAPPER);
-		if (categoryList.size() == 0) {
-			return 0;
-		}
-
-		return categoryList.get(0).getId();
-	}
-
-	/**
-	 * parentIdから親カテゴリ情報を検索します.
-	 * 
-	 * @param categoryId カテゴリーID
-	 * @return 検索されたカテゴリ詳細
-	 */
-	public CategoryDetail parentFindById(int categoryId) {
-		StringBuilder sql =new StringBuilder("SELECT c3.id big_id,c3.name big_name,c2.id middle_id,c2.name middle_name,");
-		sql.append("c1.id small_id,c1.name small_name FROM (SELECT id,parent,name FROM category  WHERE id=:categoryId) c1 ");
-		sql.append("JOIN category c2 ON c1.parent=c2.id JOIN category c3 ON c2.parent=c3.id;");
-		SqlParameterSource param = new MapSqlParameterSource().addValue("categoryId", categoryId);
-		CategoryDetail categoryDetail = template.queryForObject(sql.toString(), param, DETAIL_ROW_MAPPER);
-		return categoryDetail;
+	public int findIdByPath(String path) {
+		path = Objects.requireNonNull(path);
+		String sql = "SELECT category_id,name,path,hierarchy FROM categories WHERE path=:path;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("path", path);
+		Category category = template.queryForObject(sql, param, CATEGORY_ROW_MAPPER);
+		return category.getCategoryId();
 	}
 
 	/**
@@ -116,10 +50,10 @@ public class CategoryRepository {
 	 * 
 	 * @return 親カテゴリリスト
 	 */
-	public List<Big> findBigAll() {
-		String sql = "SELECT id,name FROM category WHERE parent is null AND name_all is null ORDER BY name;";
-		List<Big> bigList = template.query(sql, BIG_ROW_MAPPER);
-		return bigList;
+	public List<String> findBigAll() {
+		String sql = "SELECT category_id,name FROM categories WHERE hierarchy=1 ORDER BY name;";
+		List<String> bigNameList = template.query(sql, BIG_ROW_MAPPER);
+		return bigNameList;
 	}
 
 	/**
@@ -128,24 +62,13 @@ public class CategoryRepository {
 	 * @param parentId 親カテゴリID
 	 * @return 検索された子カテゴリリスト
 	 */
-	public List<Middle> findMiddleByParent(int parentId) {
-		String sql = "SELECT id,name,parent FROM category WHERE parent=:parentId ORDER BY name;";
-		SqlParameterSource param = new MapSqlParameterSource().addValue("parentId", parentId);
-		List<Middle> middleList = template.query(sql, param, MIDDLE_ROW_MAPPER);
-		return middleList;
-	}
-
-	/**
-	 * 子カテゴリに紐づく孫カテゴリを全て検索します.
-	 * 
-	 * @param parentId 親カテゴリID
-	 * @return 検索された孫カテゴリリスト
-	 */
-	public List<Small> findSmallByParent(int parentId) {
-		String sql = "SELECT id,name,parent FROM category WHERE parent=:parentId ORDER BY name;";
-		SqlParameterSource param = new MapSqlParameterSource().addValue("parentId", parentId);
-		List<Small> smallList = template.query(sql, param, SMALL_ROW_MAPPER);
-		return smallList;
+	public List<Category> findChildByParent(String path, Integer hierarchy) {
+		path = Objects.requireNonNull(path);
+		String sql = "SELECT category_id,name,path,hierarchy FROM categories WHERE path LIKE :path AND hierarchy=:hierarchy ORDER BY name;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("path", path + "%").addValue("hierarchy",
+				hierarchy);
+		List<Category> childList = template.query(sql, param, CATEGORY_ROW_MAPPER);
+		return childList;
 	}
 
 }

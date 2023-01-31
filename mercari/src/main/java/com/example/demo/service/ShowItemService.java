@@ -7,13 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.domain.Big;
-import com.example.demo.domain.CategoryDetail;
 import com.example.demo.domain.Item;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
 import com.example.demo.form.SearchItemForm;
-import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ItemRepository;
 
 /**
@@ -29,8 +24,6 @@ public class ShowItemService {
 	@Autowired
 	private ItemRepository itemRepository;
 
-	@Autowired
-	private CategoryRepository categoryRepository;
 
 	/**
 	 * 開始位置から30件の商品情報を取得します.
@@ -41,6 +34,13 @@ public class ShowItemService {
 	public List<Item> showList(int startId) {
 
 		List<Item> itemList = itemRepository.findPartOfContent(startId);
+		for (Item item : itemList) {
+			if (item.getCategoryDetail().getPath() != null) {
+				String[] categories = item.getCategoryDetail().getPath().split("/");
+				item.getCategoryDetail().setBigName(categories[0]);
+				item.getCategoryDetail().setMiddleName(categories[1]);
+			}
+		}
 		return itemList;
 	}
 
@@ -52,7 +52,7 @@ public class ShowItemService {
 	 * @param startId   取得する商品情報リストの開始位置
 	 * @return 商品リスト
 	 */
-	public List<Item> searchItemList(SearchItemForm form, String brandName, int startId) {
+	public List<Item> searchItemList(SearchItemForm form, int brandId, int startId) {
 		List<Item> itemList = new ArrayList<>();
 		// 未入力の場合は全件検索をさせる為、空文字をセットする
 		if (form.getBrand() == null) {
@@ -62,80 +62,34 @@ public class ShowItemService {
 			form.setName("");
 		}
 
-		if (brandName != null) {// ブランドをクリックした場合
-			itemList = itemRepository.findByBrand(brandName, startId);
-			itemList = getPerfectItemList(itemList);
+		if (brandId != 0) {// ブランドをクリックした場合
+			itemList = itemRepository.findByBrand(brandId, startId);
 
 		} else {// 検索フォームから検索した場合
-			if (form.getBigId() == null || form.getBigId().equals("0")) {// カテゴリ未選択
-				itemList = itemRepository.searchByNameAndBrand(form.getName(), form.getBrand(), startId);
+			if (form.getBigName() == null || form.getBigName().equals("0")) {// カテゴリ未選択
+				itemList = itemRepository.search("", form.getName(), form.getBrand(), startId);
 
-			} else if (form.getMiddleId().equals("0") || form.getMiddleId() == null) {// 親カテゴリのみ選択
-				itemList = itemRepository.searchItemOfBigCategory(Integer.parseInt(form.getBigId()), form.getName(),
+			} else if (form.getMiddleName() == null || form.getMiddleName().equals("0")) {// 親カテゴリのみ選択
+				itemList = itemRepository.search(form.getBigName() + "/", form.getName(), form.getBrand(), startId);
+
+			} else if (form.getSmallName() == null || form.getSmallName().equals("0")) {// 子カテゴリまで選択
+				itemList = itemRepository.search(form.getBigName() + "/" + form.getMiddleName() + "/", form.getName(),
 						form.getBrand(), startId);
-				itemList = getPerfectItemList(itemList);
-
-			} else if (form.getCategoryId().equals("0") || form.getCategoryId() == null) {// 子カテゴリまで選択
-				itemList = itemRepository.searchItemOfMiddleCategory(Integer.parseInt(form.getMiddleId()),
-						form.getName(), form.getBrand(), startId);
-				itemList = getPerfectItemList(itemList);
 
 			} else {// 孫カテゴリまで選択
-				itemList = itemRepository.searchItemOfSmallCategory(Integer.parseInt(form.getCategoryId()),
+				itemList = itemRepository.search(
+						form.getBigName() + "/" + form.getMiddleName() + "/" + form.getSmallName() + "/",
 						form.getName(), form.getBrand(), startId);
+			}
+		}
+		for (Item item : itemList) {
+			if (item.getCategoryDetail().getPath() != null) {
+				String[] categories = item.getCategoryDetail().getPath().split("/");
+				item.getCategoryDetail().setBigName(categories[0]);
+				item.getCategoryDetail().setMiddleName(categories[1]);
 			}
 		}
 		return itemList;
-	}
-
-	/**
-	 * 親カテゴリを全件取得します.
-	 * 
-	 * @return 親カテゴリリスト
-	 */
-	public List<Big> findBigAll() {
-		List<Big> bigList = categoryRepository.findBigAll();
-		return bigList;
-	}
-
-	/**
-	 * 親カテゴリIDから子カテゴリを取得します.
-	 * 
-	 * @param parentId 親カテゴリID
-	 * @return 検索された子カテゴリ情報
-	 */
-	public List<Middle> showMiddleListByParent(int parentId) {
-		List<Middle> middleList = categoryRepository.findMiddleByParent(parentId);
-		return middleList;
-	}
-
-	/**
-	 * 子カテゴリIDから孫カテゴリを取得します.
-	 * 
-	 * @param parentId 子カテゴリID
-	 * @return 検索された孫カテゴリ情報
-	 */
-	public List<Small> showSmallListByParent(int parentId) {
-		List<Small> smallList = categoryRepository.findSmallByParent(parentId);
-		return smallList;
-	}
-
-	/**
-	 * itemListの各itemにカテゴリ情報をセットします.
-	 * 
-	 * @param itemList 検索されたitemList
-	 * @return カテゴリ情報の入ったitemList
-	 */
-	public List<Item> getPerfectItemList(List<Item> itemList) {
-		List<Item> perfectItemList = new ArrayList<>();
-		for (Item item : itemList) {
-			if (item.getCategory() != null) {
-				CategoryDetail categoryDetail = categoryRepository.parentFindById(item.getCategory());
-				item.setCategoryDetail(categoryDetail);
-			}
-			perfectItemList.add(item);
-		}
-		return perfectItemList;
 	}
 
 }

@@ -79,9 +79,9 @@
 			<div class="form-group">
 				<label for="category" class="col-sm-2 control-label">category</label>
 				<div class="col-sm-8">
-					<select class="form-control" th:field="*{bigId}">
+					<select class="form-control" th:field="*{bigName}">
 						<option selected value="0">-- parentCategory --</option>
-						<option th:each="big:${bigList}" th:value="${big.id}" th:text="${big.name}">parentCategory1
+						<option th:each="bigName:${bigList}" th:value="${bigName}" th:text="${bigName}">parentCategory1
 						</option>
 
 					</select>
@@ -90,7 +90,7 @@
 			<div class="form-group">
 				<label for="category" class="col-sm-2 control-label"></label>
 				<div class="col-sm-8">
-					<select class="form-control" th:field="*{middleId}">
+					<select class="form-control" th:field="*{middleName}">
 						<option value="0" selected>-- childCategory --</option>
 						<option th:each="middle:${middleList}" th:value="${middle.id}" th:text="${middle.name}">
 							---</option>
@@ -101,7 +101,7 @@
 			<div class="form-group">
 				<label for="category" class="col-sm-2 control-label"></label>
 				<div class="col-sm-8">
-					<select class="form-control" th:field="*{category}">
+					<select class="form-control" th:field="*{smallName}">
 						<option value="0" selected>-- grandChild --</option>
 						<option th:each="small:${smallList}" th:value="${small.id}" th:text="${small.name}">---
 						</option>
@@ -112,7 +112,7 @@
 			<div class="form-group">
 				<label for="category" class="col-sm-2 control-label"></label>
 				<div class="col-sm-8">
-					<span class="text-danger" th:errors="*{category}">error:may not be empty</span>
+					<span class="text-danger" th:errors="*{smallName}">error:may not be empty</span>
 				</div>
 			</div>
 			<!-- brand -->
@@ -126,15 +126,9 @@
 			<div class="form-group">
 				<label for="condition" class="col-sm-2 control-label">condition</label>
 				<div class="col-sm-8">
-					<label for="condition1" class="radio-inline">
-						<input type="radio" name="conditionId" th:field="*{conditionId}" id="condition1" value="1" /> 1
-					</label>
-					<label for="condition2" class="radio-inline">
-						<input type="radio" name="conditionId" th:field="*{conditionId}" id="condition2" value="2" /> 2
-					</label>
-					<label for="condition3" class="radio-inline">
-						<input type="radio" name="conditionId" th:field="*{conditionId}" id="condition3" value="3" /> 3
-					</label>
+				<label  class="radio-inline" th:each="condition:${T(com.example.demo.common.Conditions).values()}" >
+				<input type="radio" th:field="*{conditionId}" th:value="${condition.getValue()}" th:text="${condition.getKey()}">
+				</label>
 				</div>
 			</div>
 			<div class="form-group">
@@ -160,7 +154,7 @@
 	</div>
 
 	<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-	<script src="../js/select_category.js"></script>
+	<script src="../js/show_item_list.js"></script>
 </body>
 <meta th:if="${_csrf}" th:name="_csrf" th:content="${_csrf.token}">
 <meta th:if="${_csrf}" th:name="_csrf_header" th:content="${_csrf.headerName}">

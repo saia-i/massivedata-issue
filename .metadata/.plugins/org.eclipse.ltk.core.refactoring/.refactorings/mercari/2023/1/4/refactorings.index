@@ -1,0 +1,17 @@
+1674528010263	Rename method 'parentFindById'
+1674528687204	Rename method 'findMiddleByParent'
+1674528802445	Rename local variable 'middleList'
+1674528822176	Rename method 'findMiddleByParent'
+1674528949948	Rename local variable 'middleList'
+1674529041778	Rename local variable 'middleList'
+1674531092859	Rename local variable 'name'
+1674535411076	Rename method 'showMiddleListByParent'
+1674535525323	Rename local variable 'path'
+1674535556971	Rename local variable 'middleList'
+1674540626813	Rename field 'categoryName'
+1674646617650	Delete element
+1674647007269	Delete element
+1674699679119	Delete element
+1674706848326	Delete element
+1674719757638	Rename local variable 'bigList'
+1674719905394	Rename method 'findChildByParent'

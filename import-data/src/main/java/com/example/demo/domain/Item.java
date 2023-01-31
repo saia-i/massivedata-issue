@@ -15,30 +15,15 @@ public class Item {
 	/** 状態 */
 	private Integer conditionId;
 	/** カテゴリ */
-	private Integer category;
+	private Integer categoryId;
 	/** ブランド */
-	private String brand;
+	private Integer brandId;
 	/** 価格 */
 	private double price;
 	/** 配送情報 */
 	private Integer shipping;
 	/** 説明 */
 	private String description;
-
-	@Override
-	public String toString() {
-		return "Item [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", category=" + category
-				+ ", brand=" + brand + ", price=" + price + ", shipping=" + shipping + ", description=" + description
-				+ "]";
-	}
-
-	public Integer getCategory() {
-		return category;
-	}
-
-	public void setCategory(Integer category) {
-		this.category = category;
-	}
 
 	public int getId() {
 		return id;
@@ -64,12 +49,20 @@ public class Item {
 		this.conditionId = conditionId;
 	}
 
-	public String getBrand() {
-		return brand;
+	public Integer getCategoryId() {
+		return categoryId;
 	}
 
-	public void setBrand(String brand) {
-		this.brand = brand;
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getBrandId() {
+		return brandId;
+	}
+
+	public void setBrandId(Integer brandId) {
+		this.brandId = brandId;
 	}
 
 	public double getPrice() {
@@ -94,6 +87,13 @@ public class Item {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	@Override
+	public String toString() {
+		return "Item [id=" + id + ", name=" + name + ", conditionId=" + conditionId + ", categoryId=" + categoryId
+				+ ", brandId=" + brandId + ", price=" + price + ", shipping=" + shipping + ", description="
+				+ description + "]";
 	}
 
 }

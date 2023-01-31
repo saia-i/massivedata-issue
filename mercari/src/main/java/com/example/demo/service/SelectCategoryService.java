@@ -1,14 +1,13 @@
 package com.example.demo.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.domain.Big;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
+import com.example.demo.domain.Category;
 import com.example.demo.repository.CategoryRepository;
 
 /**
@@ -29,9 +28,9 @@ public class SelectCategoryService {
 	 * 
 	 * @return 親カテゴリのリスト
 	 */
-	public List<Big> findBigAll() {
-		List<Big> bigList = categoryRepository.findBigAll();
-		return bigList;
+	public List<String> findBigAll() {
+		List<String> bigNameList = categoryRepository.findBigAll();
+		return bigNameList;
 	}
 
 	/**
@@ -40,20 +39,10 @@ public class SelectCategoryService {
 	 * @param parentId 親カテゴリID
 	 * @return 検索された子カテゴリ情報
 	 */
-	public List<Middle> findMiddleByParent(int parentId) {
-		List<Middle> middleList = categoryRepository.findMiddleByParent(parentId);
-		return middleList;
-	}
-
-	/**
-	 * 子カテゴリに紐づく孫カテゴリを取得します.
-	 * 
-	 * @param parentId 子カテゴリID
-	 * @return 検索された孫カテゴリ情報
-	 */
-	public List<Small> findSmallByParent(int parentId) {
-		List<Small> smallList = categoryRepository.findSmallByParent(parentId);
-		return smallList;
+	public List<Category> getChildList(String path, Integer hierarchy) {
+		path = Objects.requireNonNull(path);
+		List<Category> childList = categoryRepository.findChildByParent(path, hierarchy);
+		return childList;
 	}
 
 }

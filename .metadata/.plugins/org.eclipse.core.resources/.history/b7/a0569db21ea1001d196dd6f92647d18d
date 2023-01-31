@@ -1,0 +1,48 @@
+package com.example.demo.domain;
+
+public class Category2 {
+
+	private Integer categiryId;
+	private String name;
+	private String path;
+	private Integer hierarchy;
+
+	public Integer getCategiryId() {
+		return categiryId;
+	}
+
+	public void setCategiryId(Integer categiryId) {
+		this.categiryId = categiryId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public Integer getHierarchy() {
+		return hierarchy;
+	}
+
+	public void setHierarchy(Integer hierarchy) {
+		this.hierarchy = hierarchy;
+	}
+
+	@Override
+	public String toString() {
+		return "Category2 [categiryId=" + categiryId + ", name=" + name + ", path=" + path + ", hierarchy=" + hierarchy
+				+ "]";
+	}
+
+}

@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.util.List;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,11 +13,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.example.demo.domain.Big;
+import com.example.demo.domain.Category;
 import com.example.demo.domain.Item;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
 import com.example.demo.form.UpdateItemForm;
+import com.example.demo.service.SelectCategoryService;
 import com.example.demo.service.UpdateItemService;
 
 /**
@@ -32,6 +32,9 @@ public class UpdateItemController {
 	@Autowired
 	private UpdateItemService updateItemService;
 
+	@Autowired
+	private SelectCategoryService selectCategoryService;
+
 	/**
 	 * 商品情報変更画面に遷移します.
 	 * 
@@ -42,24 +45,26 @@ public class UpdateItemController {
 	public String showEditItem(UpdateItemForm form, int id, Model model) {
 		Item item = updateItemService.showEditItem(id);
 		// 入力フォームに表示させるためにformに情報をコピーする
-		form.setName(item.getName());
+		BeanUtils.copyProperties(item, form);
 		form.setPrice(String.valueOf(item.getPrice()));
-		if (item.getBrand() != null) {
-			form.setBrand(item.getBrand());
-		}
+		form.setBigName(item.getCategoryDetail().getBigName());
+		form.setMiddleName(item.getCategoryDetail().getMiddleName());
+		form.setSmallName(item.getCategoryDetail().getSmallName());
+		form.setBrand(item.getBrandName());
 		form.setConditionId(item.getConditionId().toString());
 		if (item.getDescription() != null) {
 			form.setDescription(item.getDescription());
 		}
 		model.addAttribute("item", item);
 
-		List<Big> bigList = updateItemService.findBigAll();
+		List<String> bigList = selectCategoryService.findBigAll();
 		model.addAttribute("bigList", bigList);
 
-		List<Middle> middleList = updateItemService.showMiddleListByParent(item.getCategoryDetail().getBigId());
+		List<Category> middleList = selectCategoryService.getChildList(form.getBigName() + "/", 2);
 		model.addAttribute("middleList", middleList);
 
-		List<Small> smallList = updateItemService.showSmallListByParent(item.getCategoryDetail().getMiddleId());
+		List<Category> smallList = selectCategoryService
+				.getChildList(form.getBigName() + "/" + form.getMiddleName() + "/", 3);
 		model.addAttribute("smallList", smallList);
 		return "edit";
 	}
@@ -84,14 +89,17 @@ public class UpdateItemController {
 			result.addError(fieldError);
 		}
 		// コンディションの値が不正な場合にエラーを追加（1,2,3以外の場合）
-		if (form.getConditionId() == null || !(form.getConditionId().equals("1") || form.getConditionId().equals("2")
-				|| form.getConditionId().equals("3"))) {
+		int conditionId = 0;
+		if (form.getConditionId() != null) {
+			conditionId = Integer.parseInt(form.getConditionId());
+		}
+		if (!(1 <= conditionId && conditionId <= 5)) {
 			FieldError fieldError = new FieldError(result.getObjectName(), "conditionId", "error:may not be empty");
 			result.addError(fieldError);
 		}
 		// categoryの値が不正な場合にエラーを追加（孫カテゴリまで選択されていない場合）
-		if (form.getCategory().equals("0") || form.getCategory() == null) {
-			FieldError fieldError = new FieldError(result.getObjectName(), "category", "error:may not be empty");
+		if (form.getSmallName() == null || form.getSmallName().equals("0")) {
+			FieldError fieldError = new FieldError(result.getObjectName(), "smallName", "error:may not be empty");
 			result.addError(fieldError);
 		}
 		if (result.hasErrors()) {

@@ -1,12 +1,18 @@
 package com.example.demo.service;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.demo.domain.Brand;
 import com.example.demo.domain.Item;
 import com.example.demo.form.InsertItemForm;
+import com.example.demo.repository.BrandRepository;
+import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ItemRepository;
 
 /**
@@ -22,6 +28,12 @@ public class ItemInsertService {
 	@Autowired
 	private ItemRepository itemRepository;
 
+	@Autowired
+	private CategoryRepository categoryRepository;
+
+	@Autowired
+	private BrandRepository brandRepository;
+
 	/**
 	 * 商品情報を挿入します.
 	 * 
@@ -29,11 +41,27 @@ public class ItemInsertService {
 	 * @return 採番されたID
 	 */
 	public int insertItem(InsertItemForm form) {
+		form = Objects.requireNonNull(form);
+		String categoryPath = form.getBigName() + "/" + form.getMiddleName() + "/" + form.getSmallName() + "/";
+		int categoryId = categoryRepository.findIdByPath(categoryPath);
+		int brandId = 0;
+		if (form.getBrand() == null) {
+			brandId = brandRepository.findByName("NoBrand").get().getBrandId();
+		} else {
+			Optional<Brand> brand = brandRepository.findByName(form.getBrand());
+			if (brand == null) {
+				brandId = brandRepository.insert(form.getBrand());
+			} else {
+				brandId = brand.get().getBrandId();
+			}
+		}
+
 		Item item = new Item();
 		BeanUtils.copyProperties(form, item);
 		item.setConditionId(Integer.parseInt(form.getConditionId()));
-		item.setCategory(Integer.parseInt(form.getCategory()));
+		item.setCategoryId(categoryId);
 		item.setPrice(Double.parseDouble(form.getPrice()));
+		item.setBrandId(brandId);
 
 		int id = itemRepository.insertNewItem(item);
 		return id;

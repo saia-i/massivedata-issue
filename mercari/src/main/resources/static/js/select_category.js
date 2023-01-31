@@ -3,20 +3,29 @@
  */
 "use strict";
 
-$('#bigId').change(function() {
-	$("#category").html("<option value=\"0\" selected>-- grandChild --</option>");
+$("#bigName").change(function() {
+	$("#smallName option:nth-child(n+1)").remove();
+	let defaultSmall = document.createElement("option");
+				defaultSmall.value = "0";
+				defaultSmall.text = "-- grandChild --";
+				document.getElementById("smallName").append(defaultSmall);
 	let token = $("meta[name='_csrf']").attr("content");
 	let header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function(e, xhr, options) {
 		xhr.setRequestHeader(header, token);
 	});
+	$("#middleName option:nth-child(n+1)").remove();
+	let defaultMiddle = document.createElement("option");
+				defaultMiddle.value = "0";
+				defaultMiddle.text = "-- childCategory --";
+				document.getElementById("middleName").append(defaultMiddle);
 	//入力値をセット
 	let param = {
-		id: $("#bigId  option:selected").val(),
-		name: $("#bigId option:selected").text(),
-	}
+		path: $("#bigName option:selected").text() + "/",
+		hierarchy: 2
+	};
 	//big情報送信url
-	let send_url = "/selectCategory/middle";
+	let send_url = "/selectCategory/getChildList";
 	$.ajax({
 		url: send_url,
 		type: "POST",
@@ -24,35 +33,35 @@ $('#bigId').change(function() {
 		cache: false,
 		data: JSON.stringify(param),
 		dataType: "json",
-		success: function(res) {   //resにControllerの戻り値が入る
-			let middleList = [];
-			let disableLine = "<option value=\"0\" selected>"
-				+ "-- childCategory --" + "</option>";
-			middleList.push(disableLine);
+		success: function(res) {//resにControllerの戻り値が入る
 			for (let i = 0; i < res.length; i++) {
-				let middle = "<option value=" + res[i].id + ">"
-					+ res[i].name + "</option>";
-				middleList.push(middle);
+				let op = document.createElement("option");
+				op.value = res[i].name;
+				op.text = res[i].name;
+				document.getElementById("middleName").append(op);
 			}
-			$("#middleId").html(middleList);
-		}
+		},
 	});
 });
 
-$('#middleId').change(function() {
-	$("#category").show();
+$("#middleName").change(function() {
 	let token = $("meta[name='_csrf']").attr("content");
 	let header = $("meta[name='_csrf_header']").attr("content");
 	$(document).ajaxSend(function(e, xhr, options) {
 		xhr.setRequestHeader(header, token);
 	});
+	$("#smallName option:nth-child(n+1)").remove();
+	let defaultSmall = document.createElement("option");
+				defaultSmall.value = "0";
+				defaultSmall.text = "-- grandChild --";
+				document.getElementById("smallName").append(defaultSmall);
 	//入力値をセット
 	let param = {
-		id: $("#middleId  option:selected").val(),
-		name: $("#middleId option:selected").text(),
-	}
+		path: $("#bigName option:selected").text() + "/" + $("#middleName option:selected").text() + "/",
+		hierarchy: 3
+	};
 	//middle情報送信url
-	let send_url = "/selectCategory/small";
+	let send_url = "/selectCategory/getChildList";
 	$.ajax({
 		url: send_url,
 		type: "POST",
@@ -60,17 +69,13 @@ $('#middleId').change(function() {
 		cache: false,
 		data: JSON.stringify(param),
 		dataType: "json",
-		success: function(res) {   //resにControllerの戻り値が入る
-			let smallList = [];
-			let disableLine = "<option value=\"0\" selected>-- grandChild --</option>";
-			smallList.push(disableLine);
+		success: function(res) {//resにControllerの戻り値が入る
 			for (let i = 0; i < res.length; i++) {
-				let small = "<option value=" + res[i].id + ">"
-					+ res[i].name + "</option>";
-				smallList.push(small);
+				let op = document.createElement("option");
+				op.value = res[i].name;
+				op.text = res[i].name;
+				document.getElementById("smallName").append(op);
 			}
-			$("#category").html(smallList);
-		}
+		},
 	});
 });
-

@@ -1,0 +1,56 @@
+package com.example.demo.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.domain.Brand;
+
+@Repository
+public class BrandRepository {
+
+	@Autowired
+	private NamedParameterJdbcTemplate template;
+
+	public static final RowMapper<Brand> BRAND_ROW_MAPPER = new BeanPropertyRowMapper<>(Brand.class);
+
+	public Brand load(int brandId) {
+		String sql = "SELECT id,name FROM brands WHERE brand_id=:brandId";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("brandId", brandId);
+		Brand brand = template.queryForObject(sql, param, BRAND_ROW_MAPPER);
+		return brand;
+	}
+
+	public Optional<Brand> findByName(String brandName) {
+		String sql = "SELECT brand_id,name FROM brands WHERE name ILIKE :name;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("name", brandName);
+		List<Brand> brandList = template.query(sql, param, BRAND_ROW_MAPPER);
+		if (brandList.size() == 0) {
+			return null;
+		}
+		return Optional.ofNullable(brandList.get(0));
+	}
+
+	public int insert(String brandName) {
+		String sql = "INSERT INTO brands (name) VALUES (:name);";
+		SqlParameterSource param = new MapSqlParameterSource("name", brandName);
+
+		// 採番されたidを取得する
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		String keyColumnNames[] = { "id" };
+		template.update(sql, param, keyHolder, keyColumnNames);
+		Integer brandId = keyHolder.getKey().intValue();
+
+		return brandId;
+	}
+
+}

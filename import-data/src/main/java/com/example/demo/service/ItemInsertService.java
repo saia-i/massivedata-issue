@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.domain.Item;
+import com.example.demo.repository.BrandRepository;
 import com.example.demo.repository.ItemRepository;
 
 /**
@@ -26,6 +27,9 @@ public class ItemInsertService {
 	@Autowired
 	private ItemRepository itemRepository;
 
+	@Autowired
+	private BrandRepository brandRepository;
+
 	/**
 	 * オリジナルテーブルから商品情報を全件挿入します.
 	 * 
@@ -34,10 +38,11 @@ public class ItemInsertService {
 	public void insertAllData() throws SQLException {
 		// オリジナルテーブルの情報を全件取得
 		List<Item> itemList = itemRepository.findAllJoinOriginal();
+		int brandId = brandRepository.findIdByName("NoBrand");
 
 		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari", "postgres",
 				"postgres");
-		String sql = "INSERT INTO items (name,condition_id,category,brand,price,shipping,description) VALUES(?,?,?,?,?,?,?);";
+		String sql = "INSERT INTO items (name,condition_id,category_id,brand_id,price,shipping,description) VALUES(?,?,?,?,?,?,?);";
 		PreparedStatement statement = connection.prepareStatement(sql);
 
 		int cnt = 0;
@@ -50,12 +55,15 @@ public class ItemInsertService {
 			} else {
 				statement.setInt(2, item.getConditionId());
 			}
-			if (item.getCategory() == null) {
+			if (item.getCategoryId() == null) {
 				statement.setObject(3, null);
 			} else {
-				statement.setInt(3, item.getCategory());
+				statement.setInt(3, item.getCategoryId());
 			}
-			statement.setString(4, item.getBrand());
+			if (item.getBrandId() == null) {
+				item.setBrandId(brandId);
+			}
+			statement.setInt(4, item.getBrandId());
 			statement.setDouble(5, item.getPrice());
 			statement.setInt(6, item.getShipping());
 			statement.setString(7, item.getDescription());

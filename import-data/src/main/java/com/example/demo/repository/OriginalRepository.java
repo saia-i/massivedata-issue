@@ -20,6 +20,10 @@ public class OriginalRepository {
 		String categoryName = rs.getString("category_name");
 		return categoryName;
 	};
+	private static final RowMapper<String> BRAND_NAME_ROW_MAPPER = (rs, i) -> {
+		String brandName = rs.getString("brand");
+		return brandName;
+	};
 
 	@Autowired
 	private NamedParameterJdbcTemplate template;
@@ -33,6 +37,18 @@ public class OriginalRepository {
 		String sql = "select distinct category_name from original ;";
 		List<String> categoryNameList = template.query(sql, CATEGORY_NAME_ROW_MAPPER);
 		return categoryNameList;
+
+	}
+
+	/**
+	 * ブランド名を全行取り出します.
+	 * 
+	 * @return ブランド名のリスト
+	 */
+	public List<String> findBrandNameAll() {
+		String sql = "select distinct brand from original ;";
+		List<String> brandNameList = template.query(sql, BRAND_NAME_ROW_MAPPER);
+		return brandNameList;
 
 	}
 

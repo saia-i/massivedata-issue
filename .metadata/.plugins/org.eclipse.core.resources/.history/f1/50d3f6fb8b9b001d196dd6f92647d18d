@@ -1,0 +1,75 @@
+package com.example.demo.service;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.domain.Item;
+import com.example.demo.repository.ItemRepository;
+
+/**
+ * 商品情報を操作するサービス.
+ * 
+ * @author inagakisaia
+ *
+ */
+@Service
+@Transactional
+public class ItemInsertService {
+
+	@Autowired
+	private ItemRepository itemRepository;
+
+	/**
+	 * オリジナルテーブルから商品情報を全件挿入します.
+	 * 
+	 * @throws SQLException
+	 */
+	public void insertAllData() throws SQLException {
+		// オリジナルテーブルの情報を全件取得
+		List<Item> itemList = itemRepository.findAllJoinOriginal();
+
+		Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/mercari", "postgres",
+				"postgres");
+		String sql = "INSERT INTO items (name,condition_id,category_id,brand,price,shipping,description) VALUES(?,?,?,?,?,?,?);";
+		PreparedStatement statement = connection.prepareStatement(sql);
+
+		int cnt = 0;
+		int listCnt = itemList.size();
+
+		for (Item item : itemList) {
+			statement.setString(1, item.getName());
+			if (item.getConditionId() == null) {
+				statement.setObject(2, null);
+			} else {
+				statement.setInt(2, item.getConditionId());
+			}
+			if (item.getCategoryId() == null) {
+				statement.setObject(3, null);
+			} else {
+				statement.setInt(3, item.getCategoryId());
+			}
+			statement.setString(4, item.getBrand());
+			statement.setDouble(5, item.getPrice());
+			statement.setInt(6, item.getShipping());
+			statement.setString(7, item.getDescription());
+			statement.addBatch();
+			cnt++;
+			// 1万件ごとに挿入
+			if (cnt % 10000 == 0 || cnt == listCnt) {
+				statement.executeBatch();
+			}
+		}
+
+		statement.close();
+		connection.commit();
+		connection.close();
+	}
+
+}

@@ -1,0 +1,50 @@
+package com.example.demo.service;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.domain.Item;
+import com.example.demo.form.InsertItemForm;
+import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.ItemRepository;
+
+/**
+ * 商品情報追加に関する業務処理を行うサービス.
+ * 
+ * @author inagakisaia
+ *
+ */
+@Service
+@Transactional
+public class ItemInsertService {
+
+	@Autowired
+	private ItemRepository itemRepository;
+	
+	@Autowired
+	private CategoryRepository categoryRepository;
+
+	/**
+	 * 商品情報を挿入します.
+	 * 
+	 * @param form 受け取った商品情報
+	 * @return 採番されたID
+	 */
+	public int insertItem(InsertItemForm form) {
+		String categoryPath=form.getBigName()+"/"+form.getMiddleName()+"/"+form.getSmallName()+"/";
+		int categoryId=categoryRepository.findIdByPath(categoryPath);
+		Item item = new Item();
+		BeanUtils.copyProperties(form, item);
+		item.setConditionId(Integer.parseInt(form.getConditionId()));
+		item.setCategoryId(categoryId);
+		item.setPrice(Double.parseDouble(form.getPrice()));
+		
+		System.out.println("serviceのprice : "+item.getPrice());
+
+		int id = itemRepository.insertNewItem(item);
+		return id;
+	}
+
+}

@@ -2,6 +2,8 @@ package com.example.demo.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,21 +30,21 @@ public class UserRepositoryTest {
 		System.out.println("DBにテストデータ挿入");
 		User user=new User();
 		user.setName("testname");
-		user.setMailAddress("mail@mail.com");
+		user.setMailAddress("mail@example.com");
 		user.setPassword("password");
 		userRepository.insert(user);
 		System.out.println("挿入完了");
 	}
 	
 	@ParameterizedTest
-	@ValueSource(strings = {"mail@mail.com","notfound@mail.com"})
+	@ValueSource(strings = {"mail@example.com","notfound@example.com"})
 	@DisplayName("主キー検索するテスト")
 	public void testLoad(String email) {
-		User resultUser=userRepository.load(email);
+		Optional<User> resultUser=userRepository.load(email);
 		assertThat(resultUser).isNotNull();
-		if(resultUser!=null) {
-			assertThat(resultUser.getName()).isEqualTo("testname");
-			assertThat(resultUser.getPassword()).isEqualTo("password");
+		if(resultUser.isPresent()) {
+			assertThat(resultUser.get().getName()).isEqualTo("testname");
+			assertThat(resultUser.get().getPassword()).isEqualTo("password");
 		}
 	}
 	

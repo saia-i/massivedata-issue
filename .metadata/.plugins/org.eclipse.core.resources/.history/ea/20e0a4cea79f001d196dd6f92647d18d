@@ -1,0 +1,36 @@
+package com.example.demo.domain;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+/**
+ * 商品情報を表すドメイン.
+ * 
+ * @author inagakisaia
+ *
+ */
+public class Item {
+
+	/** ID */
+	private int id;
+	/** 名前 */
+	private String name;
+	/** 状態 */
+	private Integer conditionId;
+	/** カテゴリID */
+	private Integer categoryId;
+	/** カテゴリ詳細 */
+	private CategoryDetail categoryDetail;
+	/** ブランド */
+	private Integer brandId;
+	/** 価格 */
+	private double price;
+	/** 配送情報 */
+	private Integer shipping;
+	/** 説明 */
+	private String description;
+	/** 総数 */
+	private int count;
+
+
+}

@@ -38,7 +38,7 @@ public class SecurityConfig {
 
 		http.authorizeRequests()
 				.antMatchers("/", "/showDetail", "/toPage", "/search", "/index", "/registerUser",
-						"/registerUser/insert", "/selectCategory/middle", "/selectCategory/small")
+						"/registerUser/insert", "/selectCategory/getChildList")
 				.permitAll().anyRequest().authenticated();
 
 		http.formLogin() // ログインに関する設定

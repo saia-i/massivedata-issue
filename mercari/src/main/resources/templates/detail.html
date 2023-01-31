@@ -73,16 +73,16 @@
 					</tr>
 					<tr>
 						<th>category</th>
-						<td th:text="${item.getNameAll}">Electronics / Computers &amp; Tablets / Components &amp;
+						<td th:text="${item.categoryDetail.path}">Electronics / Computers &amp; Tablets / Components &amp;
 							Parts</td>
 					</tr>
 					<tr>
 						<th>brand</th>
-						<td th:text="${item.brand}">Razer</td>
+						<td th:text="${item.brandName}">Razer</td>
 					</tr>
 					<tr>
 						<th>condition</th>
-						<td th:text="${item.conditionId}">3</td>
+						<td th:text="${T(com.example.demo.common.Conditions).of(item.conditionId).getKey()}">3</td>
 					</tr>
 					<tr>
 						<th>description</th>
@@ -98,7 +98,6 @@
 		</div>
 	</div>
 	<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
-	<script src="../js/edit_item.js"></script>
 </body>
 
 </html>

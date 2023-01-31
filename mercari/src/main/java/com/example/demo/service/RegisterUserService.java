@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import java.util.Objects;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,6 +34,7 @@ public class RegisterUserService {
 	 * @param form ユーザ情報を受け取るフォーム
 	 */
 	public void insertUser(RegisterUserForm form) {
+		form = Objects.requireNonNull(form);
 		User user = new User();
 		BeanUtils.copyProperties(form, user);
 		user.setPassword(passwordEncoder.encode(user.getPassword()));

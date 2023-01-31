@@ -8,32 +8,16 @@ package com.example.demo.domain;
  */
 public class CategoryDetail {
 
-	/** 親カテゴリID */
-	private Integer bigId;
 	/** 親カテゴリ名 */
 	private String bigName;
-	/** 子カテゴリID */
-	private Integer middleId;
 	/** 子カテゴリ名 */
 	private String middleName;
 	/** 孫カテゴリID */
 	private Integer smallId;
 	/** 孫カテゴリ名 */
 	private String smallName;
-
-	@Override
-	public String toString() {
-		return "CategoryDetail [bigId=" + bigId + ", bigName=" + bigName + ", middleId=" + middleId + ", middleName="
-				+ middleName + ", smallId=" + smallId + ", smallName=" + smallName + "]";
-	}
-
-	public Integer getBigId() {
-		return bigId;
-	}
-
-	public void setBigId(Integer bigId) {
-		this.bigId = bigId;
-	}
+	/** パス */
+	private String path;
 
 	public String getBigName() {
 		return bigName;
@@ -41,14 +25,6 @@ public class CategoryDetail {
 
 	public void setBigName(String bigName) {
 		this.bigName = bigName;
-	}
-
-	public Integer getMiddleId() {
-		return middleId;
-	}
-
-	public void setMiddleId(Integer middleId) {
-		this.middleId = middleId;
 	}
 
 	public String getMiddleName() {
@@ -73,6 +49,20 @@ public class CategoryDetail {
 
 	public void setSmallName(String smallName) {
 		this.smallName = smallName;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	@Override
+	public String toString() {
+		return "CategoryDetail [bigName=" + bigName + ", middleName=" + middleName + ", smallId=" + smallId
+				+ ", smallName=" + smallName + ", path=" + path + "]";
 	}
 
 }

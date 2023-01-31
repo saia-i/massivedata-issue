@@ -1,17 +1,17 @@
 package com.example.demo.service;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.domain.Big;
+import com.example.demo.domain.Brand;
 import com.example.demo.domain.Item;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
 import com.example.demo.form.UpdateItemForm;
+import com.example.demo.repository.BrandRepository;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ItemRepository;
 
@@ -31,6 +31,9 @@ public class UpdateItemService {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
+	@Autowired
+	private BrandRepository brandRepository;
+
 	/**
 	 * 商品情報を1件取得します.
 	 * 
@@ -39,39 +42,10 @@ public class UpdateItemService {
 	 */
 	public Item showEditItem(int itemId) {
 		Item item = itemRepository.loadJoinCategory(itemId);
+		String[] categories = item.getCategoryDetail().getPath().split("/");
+		item.getCategoryDetail().setBigName(categories[0]);
+		item.getCategoryDetail().setMiddleName(categories[1]);
 		return item;
-	}
-
-	/**
-	 * 親カテゴリを全件取得します.
-	 * 
-	 * @return 検索された親カテゴリリスト
-	 */
-	public List<Big> findBigAll() {
-		List<Big> bigList = categoryRepository.findBigAll();
-		return bigList;
-	}
-
-	/**
-	 * 親カテゴリから子カテゴリを検索します.
-	 * 
-	 * @param parentId 親カテゴリID
-	 * @return 検索された子カテゴリリスト
-	 */
-	public List<Middle> showMiddleListByParent(int parentId) {
-		List<Middle> middleList = categoryRepository.findMiddleByParent(parentId);
-		return middleList;
-	}
-
-	/**
-	 * 子カテゴリから孫カテゴリを検索します.
-	 * 
-	 * @param parentId 子カテゴリID
-	 * @return 検索された孫カテゴリリスト
-	 */
-	public List<Small> showSmallListByParent(int parentId) {
-		List<Small> smallList = categoryRepository.findSmallByParent(parentId);
-		return smallList;
 	}
 
 	/**
@@ -80,14 +54,29 @@ public class UpdateItemService {
 	 * @param form 商品情報を受け取るフォーム
 	 */
 	public void updateItem(UpdateItemForm form) {
+		form = Objects.requireNonNull(form);
+		String categoryPath = form.getBigName() + "/" + form.getMiddleName() + "/" + form.getSmallName() + "/";
+		int categoryId = categoryRepository.findIdByPath(categoryPath);
+		int brandId = 0;
+		if (form.getBrand() == null) {
+			brandId = brandRepository.findByName("NoBrand").get().getBrandId();
+		} else {
+			Optional<Brand> brand = brandRepository.findByName(form.getBrand());
+			if (brand == null) {
+				brandId = brandRepository.insert(form.getBrand());
+			} else {
+				brandId = brand.get().getBrandId();
+			}
+		}
 
 		Item item = new Item();
 		BeanUtils.copyProperties(form, item);
 		item.setId(Integer.parseInt(form.getId()));
 		item.setConditionId(Integer.parseInt(form.getConditionId()));
-		item.setCategory(Integer.parseInt(form.getCategory()));
+		item.setCategoryId(categoryId);
 		item.setPrice(Double.parseDouble(form.getPrice()));
 		item.setShipping(0);
+		item.setBrandId(brandId);
 
 		itemRepository.update(item);
 

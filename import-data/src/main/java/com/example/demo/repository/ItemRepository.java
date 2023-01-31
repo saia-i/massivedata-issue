@@ -30,7 +30,9 @@ public class ItemRepository {
 	 * @return 検索されたオリジナル情報
 	 */
 	public List<Item> findAllJoinOriginal() {
-		String sql = "SELECT o.id,o.name,o.condition_id,c.id category,o.brand,o.price,o.shipping,o.description FROM original o LEFT OUTER JOIN category c ON o.category_name=c.name_all ;";
+		String sql = "SELECT o.id,o.name,o.condition_id,c.category_id category_id,b.brand_id,o.price,o.shipping,o.description "
+				+ "FROM original o LEFT OUTER JOIN categories c ON o.category_name || '/'=c.path "
+				+ "LEFT OUTER JOIN brands b ON o.brand=b.name;";
 		template.getJdbcTemplate().setFetchSize(10000);
 		List<Item> itemList = template.query(sql, ITEM_ROW_MAPPER);
 		return itemList;

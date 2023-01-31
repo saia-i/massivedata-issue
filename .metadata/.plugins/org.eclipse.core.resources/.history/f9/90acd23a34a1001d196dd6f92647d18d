@@ -1,0 +1,32 @@
+package com.example.demo.common;
+
+public enum Conditions {
+
+	MINT("Mint", 1),NEAR_MINT("Near Mint",2), EXCELLENT("Excellent", 3),VERY_GOOD("Very Good",4), GOOD("Good", 5);
+
+	private final String key;
+	private final int value;
+
+	private Conditions(String key, int value) {
+		this.key = key;
+		this.value = value;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public static Conditions of(int value) {
+		for (Conditions condition : Conditions.values()) {
+			if (condition.value == value) {
+				return condition;
+			}
+		}
+		throw new IndexOutOfBoundsException("The key of condition doesn't exist.");
+	}
+
+}

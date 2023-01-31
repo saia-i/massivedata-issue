@@ -1,0 +1,81 @@
+/**
+ * 
+ */
+"use strict";
+
+$('#bigName').change(function() {
+	$("#smallName option:nth-child(n+1)").remove();
+	let token = $("meta[name='_csrf']").attr("content");
+	let header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function(e, xhr, options) {
+		xhr.setRequestHeader(header, token);
+	});
+	$("#middleName option:nth-child(n+1)").remove();
+	let opt = document.createElement("option");
+				opt.value = 0;
+				opt.text = "-- ChildCategory --";
+				document.getElementById("middleName").append(opt);
+	//入力値をセット
+	let param = {
+		path: $("#bigName option:selected").text() + "/",
+		hierarchy: 2
+	}
+	//big情報送信url
+	let send_url = "/selectCategory/getChildList";
+	$.ajax({
+		url: send_url,
+		type: "POST",
+		contentType: "application/json",
+		cache: false,
+		data: JSON.stringify(param),
+		dataType: "json",
+		success: function(res) {   //resにControllerの戻り値が入る
+			let middleList = [];
+			let disableLine = "<option value=\"0\" selected>-- childCategory --</option>";
+			middleList.push(disableLine);
+			for (let i = 0; i < res.length; i++) {
+				let op = document.createElement("option");
+				op.value = res[i].name;
+				op.text = res[i].name;
+				document.getElementById("middleName").append(op);
+			}
+			$("#middleId").html(middleList);
+		}
+	});
+});
+
+$('#middleId').change(function() {
+	$("#category").show();
+	let token = $("meta[name='_csrf']").attr("content");
+	let header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function(e, xhr, options) {
+		xhr.setRequestHeader(header, token);
+	});
+	//入力値をセット
+	let param = {
+		id: $("#middleId  option:selected").val(),
+		name: $("#middleId option:selected").text(),
+	}
+	//middle情報送信url
+	let send_url = "/selectCategory/small";
+	$.ajax({
+		url: send_url,
+		type: "POST",
+		contentType: "application/json",
+		cache: false,
+		data: JSON.stringify(param),
+		dataType: "json",
+		success: function(res) {   //resにControllerの戻り値が入る
+			let smallList = [];
+			let disableLine = "<option value=\"0\" selected>-- grandChild --</option>";
+			smallList.push(disableLine);
+			for (let i = 0; i < res.length; i++) {
+				let small = "<option value=" + res[i].name + ">"
+					+ res[i].name + "</option>";
+				smallList.push(small);
+			}
+			$("#category").html(smallList);
+		}
+	});
+});
+

@@ -1,6 +1,8 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -33,6 +35,7 @@ public class UserRepository {
 	 * @param user ユーザ情報
 	 */
 	public void insert(User user) {
+		user=Objects.requireNonNull(user);
 		String sql = "INSERT INTO users (name,mail_address,password,authority) VALUES (:name,:mailAddress,:password,:authority);";
 		SqlParameterSource param = new BeanPropertySqlParameterSource(user);
 		template.update(sql, param);
@@ -45,13 +48,14 @@ public class UserRepository {
 	 * @param mailAddress メールアドレス
 	 * @return 検索されたユーザ情報
 	 */
-	public User load(String mailAddress) {
+	public Optional<User> load(String mailAddress) {
+		mailAddress=Objects.requireNonNull(mailAddress);
 		String sql = "SELECT id,name,mail_address,password,authority FROM users WHERE mail_address=:mailAddress;";
 		SqlParameterSource param = new MapSqlParameterSource().addValue("mailAddress", mailAddress);
 		List<User> userList = template.query(sql, param, USER_ROW_MAPPER);
 		if (userList.size() == 0) {
 			return null;
-		}
-		return userList.get(0);
+		};
+		return Optional.ofNullable(userList.get(0));
 	}
 }

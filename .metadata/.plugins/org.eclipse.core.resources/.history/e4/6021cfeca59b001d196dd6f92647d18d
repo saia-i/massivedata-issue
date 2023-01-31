@@ -1,0 +1,249 @@
+package com.example.demo.service;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.demo.domain.Big;
+import com.example.demo.domain.Category;
+import com.example.demo.domain.Category2;
+import com.example.demo.domain.CategoryName;
+import com.example.demo.domain.CategoryNames;
+import com.example.demo.domain.Child;
+import com.example.demo.domain.Middle;
+import com.example.demo.domain.Parent;
+import com.example.demo.domain.Small;
+import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.OriginalRepository;
+
+/**
+ * カテゴリ情報の挿入に関する業務処理を行うサービス.
+ * 
+ * @author inagakisaia
+ *
+ */
+@Service
+@Transactional
+public class CategoryInsertService {
+
+	@Autowired
+	private OriginalRepository originalRepository;
+
+	@Autowired
+	private CategoryRepository categoryRepository;
+
+	/**
+	 * カテゴリカラムの情報を正規化した形に振り分けます.
+	 */
+	public void insertCategory() {
+
+		// ユニークカテゴリの名前を取得
+		List<String> categoryNameList = originalRepository.findByCategoryName();
+
+		// ユニーク親カテゴリ
+		Set<String> parent = new HashSet<>();
+
+		// カテゴリの重複がないリストを作成
+		List<CategoryName> categoryList = new ArrayList<>();
+		for (int i = 0; i < categoryNameList.size(); i++) {
+			try {
+				String categoryNames[] = categoryNameList.get(i).split("/");
+				parent.add(categoryNames[0]);
+
+				categoryList.add(new CategoryName(categoryNames[0], categoryNames[1], categoryNames[2],
+						categoryNameList.get(i)));
+
+			} catch (Exception e) {
+
+			}
+		}
+		// 親カテゴリ名
+		List<Big> bigs = new ArrayList<>();
+		for (String tmp : parent) {
+			bigs.add(new Big(tmp, new ArrayList<>()));
+		}
+		// 子、孫カテゴリリストを持たせる
+		for (int i = 0; i < bigs.size(); i++) {
+			int count = 0;
+			for (int j = 0; j < categoryList.size(); j++) {
+				// 大項目が一致した時
+				if (bigs.get(i).getName().equals(categoryList.get(j).getBig())) {
+					// middleのlistを持っていなければnewしてsmallも挿入
+					if (bigs.get(i).getMiddle() == null) {
+						bigs.get(i).getMiddle().add(count,
+								new Middle(categoryList.get(j).getMiddle(), new ArrayList<>()));
+						bigs.get(i).getMiddle().get(count).getSmall()
+								.add(new Small(categoryList.get(j).getSmall(), categoryList.get(j).getPath()));
+						count++;
+					} else {
+						boolean check = true;
+						// リスト内にmiddleが一致するものを持ってたらそこにsmallを追加
+						for (int k = 0; k < bigs.get(i).getMiddle().size(); k++) {
+							if (bigs.get(i).getMiddle().get(k).getName().equals(categoryList.get(j).getMiddle())) {
+								bigs.get(i).getMiddle().get(k).getSmall()
+										.add(new Small(categoryList.get(j).getSmall(), categoryList.get(j).getPath()));
+								check = false;
+							}
+						}
+						// 一致するmiddleが無ければ新たにnewしてsmall挿入
+						if (check) {
+							bigs.get(i).getMiddle().add(count,
+									new Middle(categoryList.get(j).getMiddle(), new ArrayList<>()));
+							bigs.get(i).getMiddle().get(count).getSmall()
+									.add(new Small(categoryList.get(j).getSmall(), categoryList.get(j).getPath()));
+							count++;
+						}
+					}
+				}
+			}
+		}
+		// 空の要素を削除
+		for (int i = 0; i < bigs.size(); i++) {
+			if (bigs.get(i).getMiddle().size() == 0) {
+				bigs.remove(i);
+			}
+		}
+		// カテゴリテーブルに挿入する
+		for (Big big : bigs) {
+			Category bigObj = new Category();
+			bigObj.setName(big.getName());
+			Integer bigID = categoryRepository.insert(bigObj);
+			for (Middle middle : big.getMiddle()) {
+				Category middleObj = new Category();
+				middleObj.setName(middle.getName());
+				middleObj.setParent(bigID);
+				Integer middleId = categoryRepository.insert(middleObj);
+				for (Small small : middle.getSmall()) {
+					Category smallObj = new Category();
+					smallObj.setParent(middleId);
+					smallObj.setName(small.getName());
+					smallObj.setNameAll(small.getPath());
+					categoryRepository.insert(smallObj);
+				}
+			}
+		}
+	}
+
+	public void insertCategories() {
+
+		// ユニークカテゴリの名前を取得
+		List<String> categoryNameList = originalRepository.findByCategoryName();
+
+		// ユニーク親カテゴリ
+		Set<String> parents = new HashSet<>();
+
+		// カテゴリの重複がないリストを作成
+		List<CategoryNames> categoryList = new ArrayList<>();
+		for (String categoryName : categoryNameList) {
+			try {
+				String categoryNames[] = categoryName.split("/");
+				parents.add(categoryNames[0]);
+
+				categoryList.add(new CategoryNames(categoryNames[0], categoryNames[1], categoryNames[2]));
+
+			} catch (Exception e) {
+
+			}
+		}
+		// 親カテゴリ名
+		List<Parent> parentList = new ArrayList<>();
+		for (String parent : parents) {
+			parentList.add(new Parent(parent, new ArrayList<>()));
+		}
+		// 子、孫カテゴリリストを持たせる
+		for (Parent parent : parentList) {
+			int count = 0;
+			for (CategoryNames cateogryNames : categoryList) {
+				// 大項目が一致した時
+				if (parent.getName().equals(cateogryNames.getParent())) {
+					// middleのlistを持っていなければnewしてsmallも挿入
+					if (parent.getChildList() == null) {
+						parent.getChildList().add(count, new Child(cateogryNames.getChild(), new ArrayList<>()));
+						parent.getChildList().get(count).getGrandChildList().add(cateogryNames.getGrandChild());
+						count++;
+					} else {
+						boolean check = true;
+						// リスト内にmiddleが一致するものを持ってたらそこにsmallを追加
+						for (Child child : parent.getChildList()) {
+							if (child.getName().equals(cateogryNames.getChild())) {
+								child.getGrandChildList().add(cateogryNames.getGrandChild());
+								check = false;
+							}
+						}
+						// 一致するmiddleが無ければ新たにnewしてsmall挿入
+						if (check) {
+							parent.getChildList().add(count, new Child(cateogryNames.getChild(), new ArrayList<>()));
+							parent.getChildList().get(count).getGrandChildList().add(cateogryNames.getGrandChild());
+							count++;
+						}
+					}
+				}
+			}
+		}
+		// 空の要素を削除
+		for (int i = 0; i < parentList.size(); i++) {
+			if (parentList.get(i).getChildList().size() == 0) {
+				parentList.remove(i);
+			}
+		}
+
+		// カテゴリテーブルに挿入する
+//		int count=1;
+//		for (Parent parent : parentList) {
+//			Integer parentId = count;
+//			Category2 parentObj = new Category2();
+//			parentObj.setId(parentId);
+//			parentObj.setName(parent.getName());
+//			categoryRepository.add(parentObj);
+//			count++;
+//
+//			for (Child child : parent.getChildList()) {
+//				Integer childId = count;
+//				Category2 childObj = new Category2();
+//				childObj.setId(childId);
+//				childObj.setName(child.getName());
+//				childObj.setPath(parentId + "/" + childId);
+//				categoryRepository.add(childObj);
+//				count++;
+//
+//				for (String grandChild : child.getGrandChildList()) {
+//					Integer grandChildId = count;
+//					Category2 grandChildObj = new Category2();
+//					grandChildObj.setId(grandChildId);
+//					grandChildObj.setName(grandChild);
+//					grandChildObj.setPath(parentId + "/" + childId + "/" + grandChildId);
+//					categoryRepository.add(grandChildObj);
+//					count++;
+//				}
+//			}
+//		}
+		for (Parent parent : parentList) {
+			Category2 parentObj = new Category2();
+			parentObj.setName(parent.getName());
+			parentObj.setHierarchy(1);
+			categoryRepository.add(parentObj);
+			
+			for (Child child : parent.getChildList()) {
+				Category2 childObj = new Category2();
+				childObj.setName(child.getName());
+				childObj.setPath(parent.getName() + "/" + child.getName());
+				childObj.setHierarchy(2);
+				categoryRepository.add(childObj);
+				
+				for (String grandChild : child.getGrandChildList()) {
+					Category2 grandChildObj = new Category2();
+					grandChildObj.setName(grandChild);
+					grandChildObj.setPath(parent.getName() + "/" + child.getName() + "/" + grandChild);
+					grandChildObj.setHierarchy(3);
+					categoryRepository.add(grandChildObj);
+				}
+			}
+		}
+	}
+
+}

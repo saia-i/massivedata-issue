@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- css -->
+	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+		integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+		integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+		integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous" />
+	<link rel="stylesheet" th:href="@{/css/mercari.css}" />
+	<!-- script -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+		integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+		crossorigin="anonymous"></script>
+	<title>Rakus Items</title>
+</head>
+
+<body>
+	<!-- navbar -->
+	<nav class="navbar navbar-inverse">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+				aria-expanded="false" aria-controls="navbar">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" th:href="@{/}">Rakus Items</a>
+		</div>
+		<div id="navbar" class="collapse navbar-collapse">
+			<div>
+				<ul class="nav navbar-nav navbar-right">
+					<li sec:authorize="!isAuthenticated()"><a id="login" th:href="@{/index?error=false}">Login <i
+								class="fa fa-power-off"></i></a></li>
+					<li sec:authorize="isAuthenticated()"><a id="logout" th:href="@{/logout}">Logout <i
+								class="fa fa-power-off"></i></a></li>
+				</ul>
+				<p class="navbar-text navbar-right">
+					<span>user: </span>
+					<span id="loginName" 　sec:authentication="name">user: userName</span>
+				</p>
+			</div>
+		</div>
+	</nav>
+
+	<!-- details -->
+	<div id="input-main" class="container">
+		<a type="button" class="btn btn-default" a href="javascript:void(0)" onclick="javascript:history.back()"><i
+				class="fa fa-reply"></i> back</a>
+		<h2>Edit</h2>
+
+		<!-- edit form -->
+		<form th:action="@{/updateItem/edit}" method="POST" class="form-horizontal" th:object="${updateItemForm}">
+			<input type="hidden" name="id" th:value="${item.id}">
+			<!-- name -->
+			<div class="form-group">
+				<label for="inputName" class="col-sm-2 control-label">name</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="inputName" name="name" th:field="*{name}" />
+					<span class="text-danger" th:errors="*{name}">error:may not be empty</span>
+				</div>
+			</div>
+			<!-- price -->
+			<div class="form-group">
+				<label for="price" class="col-sm-2 control-label">price</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="price" name="price" th:field="*{price}" />
+					<span class="text-danger" th:errors="*{price}">error:may not be empty</span>
+				</div>
+			</div>
+			<!-- category -->
+			<div class="form-group">
+				<label for="category" class="col-sm-2 control-label">category</label>
+				<div class="col-sm-8">
+					<select class="form-control" th:field="*{bigName}">
+						<option th:value="${item.categoryDetail.bigName}" th:text="${item.categoryDetail.bigName}"
+							selected>-- parentCategory --</option>
+						<option th:each="big:${bigList}" th:value="${big.name}" th:text="${big.name}">parentCategory1
+						</option>
+
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="category" class="col-sm-2 control-label"></label>
+				<div class="col-sm-8">
+					<select class="form-control" th:field="*{middleName}">
+						<option th:value="${item.categoryDetail.middleName}" th:text="${item.categoryDetail.middleName}"
+							selected>-- childCategory --</option>
+						<option th:each="middle:${middleList}" th:value="${middle.name}" th:text="${middle.name}">
+							childCategory1</option>
+
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="category" class="col-sm-2 control-label"></label>
+				<div class="col-sm-8">
+					<select class="form-control" th:field="*{smallName}">
+						<option th:value="${item.categoryDetail.smallName}" th:text="${item.categoryDetail.smallName}"
+							selected>-- grandChild --</option>
+						<option th:each="small:${smallList}" th:value="${small.name}" th:text="${small.name}">grandChild1
+						</option>
+
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="category" class="col-sm-2 control-label"></label>
+				<div class="col-sm-8">
+					<span class="text-danger" th:errors="*{smallName}">error:may not be empty</span>
+				</div>
+			</div>
+			<!-- brand -->
+			<div class="form-group">
+				<label for="brand" class="col-sm-2 control-label">brand</label>
+				<div class="col-sm-8">
+					<input type="text" id="brand" class="form-control" name="brand" th:field="*{brand}" />
+				</div>
+			</div>
+			<!-- condition -->
+			<div class="form-group">
+				<label for="condition" class="col-sm-2 control-label">condition</label>
+				<div class="col-sm-8">
+					<label class="radio-inline" th:each="condition:${T(com.example.demo.common.Conditions).values()}">
+						<input type="radio" th:field="*{conditionId}" th:value="${condition.getValue()}"
+							th:text="${condition.getKey()}">
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="category" class="col-sm-2 control-label"></label>
+				<div class="col-sm-8">
+					<span class="text-danger" th:errors="*{conditionId}">error:may not be empty</span>
+				</div>
+			</div>
+			<!-- description -->
+			<div class="form-group">
+				<label for="description" class="col-sm-2 control-label">description</label>
+				<div class="col-sm-8">
+					<textarea name="description" id="description" class="form-control" rows="5"
+						th:field="*{description}"></textarea>
+				</div>
+			</div>
+			<!-- submit button -->
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-default">Submit</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+	<script src="../js/show_item_list.js"></script>
+</body>
+<meta th:name="_csrf" th:content="${_csrf.token}">
+<meta th:name="_csrf_header" th:content="${_csrf.headerName}">
+
+</html>

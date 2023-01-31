@@ -1,0 +1,22 @@
+package com.example.demo.repository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Repository;
+
+
+@Repository
+public class BrandRepository {
+	
+	@Autowired
+	private NamedParameterJdbcTemplate template;
+	
+	public void insert(String name) {
+		String sql="INSERT INTO brands (name) VALUES (:name);";
+		SqlParameterSource param=new MapSqlParameterSource().addValue("name", name);
+		template.update(sql, param);
+	}
+
+}

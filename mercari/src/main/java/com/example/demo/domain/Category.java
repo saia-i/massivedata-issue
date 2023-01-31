@@ -9,40 +9,32 @@ package com.example.demo.domain;
 public class Category {
 
 	/** ID */
-	private int id;
-	/** 親カテゴリID */
-	private Integer parent;
+	private Integer categoryId;
 	/** 名前 */
 	private String name;
 	/** パス */
-	private String nameAll;
+	private String path;
+	/** 階層 */
+	private Integer hierarchy;
 
 	public Category() {
 
 	}
 
-	public Category(int id, Integer parent, String name, String nameAll) {
+	public Category(Integer categoryId, String name, String path, Integer hierarchy) {
 		super();
-		this.id = id;
-		this.parent = parent;
+		this.categoryId = categoryId;
 		this.name = name;
-		this.nameAll = nameAll;
+		this.path = path;
+		this.hierarchy = hierarchy;
 	}
 
-	public int getId() {
-		return id;
+	public Integer getCategoryId() {
+		return categoryId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public Integer getParent() {
-		return parent;
-	}
-
-	public void setParent(Integer parent) {
-		this.parent = parent;
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
 	}
 
 	public String getName() {
@@ -53,17 +45,26 @@ public class Category {
 		this.name = name;
 	}
 
-	public String getNameAll() {
-		return nameAll;
+	public String getPath() {
+		return path;
 	}
 
-	public void setNameAll(String nameAll) {
-		this.nameAll = nameAll;
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public Integer getHierarchy() {
+		return hierarchy;
+	}
+
+	public void setHierarchy(Integer hierarchy) {
+		this.hierarchy = hierarchy;
 	}
 
 	@Override
 	public String toString() {
-		return "Category [id=" + id + ", parent=" + parent + ", name=" + name + ", nameAll=" + nameAll + "]";
+		return "Category [categoryId=" + categoryId + ", name=" + name + ", path=" + path + ", hierarchy=" + hierarchy
+				+ "]";
 	}
 
 }

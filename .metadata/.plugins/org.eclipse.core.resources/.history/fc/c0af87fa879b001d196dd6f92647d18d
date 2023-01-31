@@ -1,0 +1,89 @@
+package com.example.demo.repository;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.domain.Big;
+import com.example.demo.domain.Category;
+import com.example.demo.domain.CategoryDetail;
+import com.example.demo.domain.Middle;
+import com.example.demo.domain.Small;
+
+/**
+ * カテゴリ情報を操作するリポジトリ.
+ * 
+ * @author inagakisaia
+ *
+ */
+@Repository
+public class CategoryRepository {
+
+	@Autowired
+	private NamedParameterJdbcTemplate template;
+
+	private static final RowMapper<Category> CATEGORY_ROW_MAPPER = new BeanPropertyRowMapper<>(Category.class);
+
+	private static final RowMapper<CategoryDetail> DETAIL_ROW_MAPPER = new BeanPropertyRowMapper<>(
+			CategoryDetail.class);
+
+	private static final RowMapper<Big> BIG_ROW_MAPPER = (rs, i) -> {
+		Big big = new Big();
+		big.setId(rs.getInt("id"));
+		big.setName(rs.getString("name"));
+		return big;
+	};
+
+	private static final RowMapper<Middle> MIDDLE_ROW_MAPPER = new BeanPropertyRowMapper<>(Middle.class);
+
+	private static final RowMapper<Small> SMALL_ROW_MAPPER = new BeanPropertyRowMapper<>(Small.class);
+
+
+
+	/**
+	 * 全ての親カテゴリを検索します.
+	 * 
+	 * @return 親カテゴリリスト
+	 */
+	public List<Big> findBigAll() {
+		String sql = "SELECT id,name FROM category WHERE parent is null AND name_all is null ORDER BY name;";
+		List<Big> bigList = template.query(sql, BIG_ROW_MAPPER);
+		return bigList;
+	}
+
+	/**
+	 * 親カテゴリに紐づく子カテゴリを全て検索します.
+	 * 
+	 * @param parentId 親カテゴリID
+	 * @return 検索された子カテゴリリスト
+	 */
+	public List<Middle> findMiddleByParent(int parentId) {
+		String sql = "SELECT id,name,parent FROM category WHERE parent=:parentId ORDER BY name;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("parentId", parentId);
+		List<Middle> middleList = template.query(sql, param, MIDDLE_ROW_MAPPER);
+		return middleList;
+	}
+
+	/**
+	 * 子カテゴリに紐づく孫カテゴリを全て検索します.
+	 * 
+	 * @param parentId 親カテゴリID
+	 * @return 検索された孫カテゴリリスト
+	 */
+	public List<Small> findSmallByParent(int parentId) {
+		String sql = "SELECT id,name,parent FROM category WHERE parent=:parentId ORDER BY name;";
+		SqlParameterSource param = new MapSqlParameterSource().addValue("parentId", parentId);
+		List<Small> smallList = template.query(sql, param, SMALL_ROW_MAPPER);
+		return smallList;
+	}
+
+}

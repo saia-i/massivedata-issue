@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.example.demo.domain.Big;
-import com.example.demo.domain.Middle;
-import com.example.demo.domain.Small;
+import com.example.demo.domain.Category;
 import com.example.demo.service.SelectCategoryService;
 
 /**
@@ -33,24 +31,12 @@ public class SelectCategoryController {
 	 * @param big 親カテゴリーのid
 	 * @return 親カテゴリーに紐づく子カテゴリのリスト
 	 */
-	@PostMapping("/middle")
+	@PostMapping("/getChildList")
 	@ResponseBody
-	public List<Middle> setMiddle(@RequestBody Big big) {
-		List<Middle> middleList = selectCategoryService.findMiddleByParent(big.getId());
-		return middleList;
+	public List<Category> setMiddle(@RequestBody Category category) {
+		List<Category> childList = selectCategoryService.getChildList(category.getPath(),category.getHierarchy());
+		return childList;
 	}
 
-	/**
-	 * 親カテゴリに紐づく子カテゴリを検索します.
-	 * 
-	 * @param middle 親カテゴリーのid
-	 * @return 親カテゴリーに紐づく子カテゴリのリスト
-	 */
-	@PostMapping("/small")
-	@ResponseBody
-	public List<Small> setSmall(@RequestBody Middle middle) {
-		List<Small> smallList = selectCategoryService.findSmallByParent(middle.getId());
-		return smallList;
-	}
 
 }

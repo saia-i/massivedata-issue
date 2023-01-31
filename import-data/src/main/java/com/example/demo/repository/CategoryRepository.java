@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.domain.Category;
@@ -28,14 +26,10 @@ public class CategoryRepository {
 	 * @param category カテゴリ情報
 	 * @return 採番されたID
 	 */
-	public Integer insert(Category category) {
-		String sql = "INSERT INTO category (parent,name,name_all) VALUES(:parent,:name,:nameAll)";
+	public void add(Category category) {
+		String sql = "INSERT INTO categories (name,path,hierarchy) VALUES(:name,:path,:hierarchy);";
 		SqlParameterSource param = new BeanPropertySqlParameterSource(category);
-		KeyHolder keyHolder = new GeneratedKeyHolder();
-		String keyColumnNames[] = { "id" };
-		template.update(sql, param, keyHolder, keyColumnNames);
-		Integer id = keyHolder.getKey().intValue();
-		return id;
+		template.update(sql, param);
 	}
 
 }

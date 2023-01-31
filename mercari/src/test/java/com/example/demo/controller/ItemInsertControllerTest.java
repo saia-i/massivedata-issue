@@ -67,7 +67,7 @@ public class ItemInsertControllerTest {
 	public void nameTest(String name) throws Exception {
 		InsertItemForm form = new InsertItemForm();
 		form.setName(name);
-		form.setConditionId("1");
+		form.setConditionId(1);
 		form.setSmallName("1");
 		form.setPrice("10");
 
@@ -82,7 +82,7 @@ public class ItemInsertControllerTest {
 	public void priceTest(Double price) throws Exception {
 		InsertItemForm form = new InsertItemForm();
 		form.setName("testItem");
-		form.setConditionId("1");
+		form.setConditionId(1);
 		form.setSmallName("1");
 		form.setPrice(price.toString());
 
@@ -97,7 +97,7 @@ public class ItemInsertControllerTest {
 	public void categoryTest(String category) throws Exception {
 		InsertItemForm form = new InsertItemForm();
 		form.setName("testItem");
-		form.setConditionId("1");
+		form.setConditionId(1);
 		form.setSmallName(category);
 		form.setPrice("10");
 

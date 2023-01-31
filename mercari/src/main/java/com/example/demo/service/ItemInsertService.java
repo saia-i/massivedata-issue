@@ -49,16 +49,15 @@ public class ItemInsertService {
 			brandId = brandRepository.findByName("NoBrand").get().getBrandId();
 		} else {
 			Optional<Brand> brand = brandRepository.findByName(form.getBrand());
-			if (brand == null) {
-				brandId = brandRepository.insert(form.getBrand());
-			} else {
-				brandId = brand.get().getBrandId();
+			if(brand.isPresent()) {
+				brandId=brand.get().getBrandId();
+			}else {
+				brandId=brandRepository.insert(form.getBrand());
 			}
 		}
 
 		Item item = new Item();
 		BeanUtils.copyProperties(form, item);
-		item.setConditionId(Integer.parseInt(form.getConditionId()));
 		item.setCategoryId(categoryId);
 		item.setPrice(Double.parseDouble(form.getPrice()));
 		item.setBrandId(brandId);

@@ -40,7 +40,7 @@ public enum Conditions {
 				return condition;
 			}
 		}
-		throw new IndexOutOfBoundsException("The key of condition doesn't exist.");
+		return null;
 	}
 
 }

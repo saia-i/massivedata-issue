@@ -32,7 +32,7 @@ public class ItemInsertServiceTest {
 		InsertItemForm form = new InsertItemForm();
 		form.setName("name");
 		form.setBrand("brand");
-		form.setConditionId("1");
+		form.setConditionId(1);
 		form.setSmallName("100");
 		form.setPrice("9.9");
 

@@ -3,7 +3,6 @@ package com.example.demo.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,15 +37,12 @@ public class UserDetailServiceImpl implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String mailAddress) throws UsernameNotFoundException {
 		mailAddress = Objects.requireNonNull(mailAddress);
-		Optional<User> user = userRepository.load(mailAddress);
-		if (!user.isPresent()) {
-			throw new UsernameNotFoundException("error:failed to login");
-		}
+		User user=userRepository.load(mailAddress).orElseThrow(IllegalArgumentException::new);
 		Collection<GrantedAuthority> authorityList = new ArrayList<>();
 		authorityList.add(new SimpleGrantedAuthority("ROLE_USER")); // ユーザ権限付与
 //		if(administrator.isAdmin()) {
 //			authorityList.add(new SimpleGrantedAuthority("ROLE_ADMIN")); // 管理者権限付与
 //		}
-		return new LoginUser(user.get(), authorityList);
+		return new LoginUser(user, authorityList);
 	}
 }

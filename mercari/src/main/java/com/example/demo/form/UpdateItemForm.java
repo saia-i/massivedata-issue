@@ -16,7 +16,7 @@ public class UpdateItemForm {
 	@NotBlank(message = "error:may not be empty")
 	private String name;
 	/** 状態 */
-	private String conditionId;
+	private Integer conditionId;
 	/** 孫カテゴリ名 */
 	private String smallName;
 	/** 親カテゴリ名 */
@@ -48,11 +48,11 @@ public class UpdateItemForm {
 		this.name = name;
 	}
 
-	public String getConditionId() {
+	public Integer getConditionId() {
 		return conditionId;
 	}
 
-	public void setConditionId(String conditionId) {
+	public void setConditionId(Integer conditionId) {
 		this.conditionId = conditionId;
 	}
 

@@ -72,7 +72,6 @@ public class UpdateItemService {
 		Item item = new Item();
 		BeanUtils.copyProperties(form, item);
 		item.setId(Integer.parseInt(form.getId()));
-		item.setConditionId(Integer.parseInt(form.getConditionId()));
 		item.setCategoryId(categoryId);
 		item.setPrice(Double.parseDouble(form.getPrice()));
 		item.setShipping(0);

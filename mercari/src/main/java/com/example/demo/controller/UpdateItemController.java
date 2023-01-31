@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.example.demo.common.Conditions;
 import com.example.demo.domain.Category;
 import com.example.demo.domain.Item;
 import com.example.demo.form.UpdateItemForm;
@@ -51,7 +52,6 @@ public class UpdateItemController {
 		form.setMiddleName(item.getCategoryDetail().getMiddleName());
 		form.setSmallName(item.getCategoryDetail().getSmallName());
 		form.setBrand(item.getBrandName());
-		form.setConditionId(item.getConditionId().toString());
 		if (item.getDescription() != null) {
 			form.setDescription(item.getDescription());
 		}
@@ -88,12 +88,8 @@ public class UpdateItemController {
 					"error:must be between 0.3 and 9999999.9");
 			result.addError(fieldError);
 		}
-		// コンディションの値が不正な場合にエラーを追加（1,2,3以外の場合）
-		int conditionId = 0;
-		if (form.getConditionId() != null) {
-			conditionId = Integer.parseInt(form.getConditionId());
-		}
-		if (!(1 <= conditionId && conditionId <= 5)) {
+		// コンディションの値が不正（Conditionsに含まれない値）な場合にエラーを追加
+		if (Conditions.of(form.getConditionId()) == null) {
 			FieldError fieldError = new FieldError(result.getObjectName(), "conditionId", "error:may not be empty");
 			result.addError(fieldError);
 		}

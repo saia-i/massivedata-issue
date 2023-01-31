@@ -16,7 +16,7 @@ public class InsertItemForm {
 	@NotBlank(message = "error:may not be empty")
 	private String name;
 	/** 状態 */
-	private String conditionId;
+	private Integer conditionId;
 	/** 小カテゴリ名 */
 	private String smallName;
 	/** 大カテゴリ名 */
@@ -48,11 +48,11 @@ public class InsertItemForm {
 		this.name = name;
 	}
 
-	public String getConditionId() {
+	public Integer getConditionId() {
 		return conditionId;
 	}
 
-	public void setConditionId(String conditionId) {
+	public void setConditionId(Integer conditionId) {
 		this.conditionId = conditionId;
 	}
 
